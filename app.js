@@ -240,17 +240,19 @@
       b.disabled = true;
       b.textContent = "…";
     }
-    // Hide ghost while Show me runs — two copies caused the offset shadow
+    // Hide guide while Show me runs — two copies caused a double shadow
     updateGuides();
     try {
       await showMeStroke();
+    } catch (err) {
+      console.warn("Show me failed:", err);
     } finally {
       state.teaching = false;
-      updateGuides();
       for (const b of playBtns) {
         b.disabled = false;
         b.textContent = label;
       }
+      updateGuides();
     }
   }
 
@@ -904,9 +906,33 @@
         setLetter(ch);
         brush.clear();
         updateCount();
+        setGhost(true);
       });
       presetsEl.appendChild(btn);
     }
+  }
+
+  /** Calligraphy: put a random real Arabic word on the paper to practice. */
+  function applyRandomWord() {
+    const avoid = (state.current?.char || typeInput?.value || "").trim();
+    const word =
+      typeof randomPracticeWord === "function"
+        ? randomPracticeWord(avoid)
+        : "سلام";
+    if (typeInput) typeInput.value = word;
+    setLetter(word);
+    brush.clear();
+    updateCount();
+    setGhost(true);
+    if (hint && hintText) {
+      hint.hidden = false;
+      hintText.textContent = `Random word · ${word} — trace the guide or Show me. · `;
+    }
+  }
+
+  const randomWordBtn = document.getElementById("randomWordBtn");
+  if (randomWordBtn) {
+    randomWordBtn.addEventListener("click", applyRandomWord);
   }
 
   function syncFromInput(commit) {

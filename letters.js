@@ -356,6 +356,106 @@ const PRESETS = [
   "الله", "سلام", "حب", "نور", "حق", "علم",
 ];
 
+/**
+ * Real Arabic words for calligraphy practice (common, short–medium).
+ * Used by the random-word generator — not calligraphy ornament phrases only.
+ */
+const PRACTICE_POOL = [
+  "سلام",
+  "حب",
+  "نور",
+  "حق",
+  "علم",
+  "قلب",
+  "صبر",
+  "أمل",
+  "خير",
+  "بركة",
+  "رحمة",
+  "شكر",
+  "دعاء",
+  "يقين",
+  "توكل",
+  "إخاء",
+  "عدل",
+  "صدق",
+  "حلم",
+  "فوز",
+  "نجاح",
+  "كتاب",
+  "قلم",
+  "بيت",
+  "ماء",
+  "شمس",
+  "قمر",
+  "نجم",
+  "ورد",
+  "بحر",
+  "جبل",
+  "طريق",
+  "صديق",
+  "أم",
+  "أب",
+  "أخ",
+  "أخت",
+  "حياة",
+  "سلامٌ",
+  "الحمد",
+  "بسم",
+  "الله",
+  "محمد",
+  "أحمد",
+  "فاطمة",
+  "علي",
+  "حسن",
+  "حسين",
+  "يوسف",
+  "مريم",
+  "آية",
+  "سورة",
+  "ذكر",
+  "صلاة",
+  "زكاة",
+  "صوم",
+  "حج",
+  "إيمان",
+  "إسلام",
+  "قرآن",
+  "حكمة",
+  "معرفة",
+  "جمال",
+  "سلام عليكم",
+  "بسم الله",
+  "الحمد لله",
+  "الله أكبر",
+  "سبحان الله",
+  "لا إله إلا الله",
+  "محمد رسول الله",
+  "ربنا",
+  "يا رب",
+  "توكلت",
+  "استغفر",
+  "اللهم",
+  "نور على نور",
+  "علم نافع",
+  "قلب سليم",
+  "خلق عظيم",
+];
+
+/** Pick a random practice word/phrase (different from `avoid` when possible). */
+function randomPracticeWord(avoid) {
+  const pool = PRACTICE_POOL.filter(Boolean);
+  if (!pool.length) return "سلام";
+  if (pool.length === 1) return pool[0];
+  let word = pool[Math.floor(Math.random() * pool.length)];
+  let guard = 0;
+  while (avoid && word === avoid && guard < 12) {
+    word = pool[Math.floor(Math.random() * pool.length)];
+    guard++;
+  }
+  return word;
+}
+
 function findLetter(text) {
   const t = (text || "").trim();
   if (!t) return null;

@@ -293,7 +293,9 @@ function analyzeGlyph(layer, paperSize) {
 }
 
 /**
- * Animate Show me: reveal glyph from right → left with a soft pen tip.
+ * Animate Show me: reveal glyph from right → left (Arabic writing direction).
+ * Rebuilds the revealed region each frame so the word never “vanishes”
+ * mid-animation (a prior mask-only-delta bug left only a grey pen tip).
  */
 async function animateShowMeGlyph(
   inkCanvas,
@@ -304,91 +306,91 @@ async function animateShowMeGlyph(
   styleId
 ) {
   const size = Math.round(paperSize);
-  const shared = getSharedGlyphLayer(text, size, guide, styleId);
+  if (!size || !inkCanvas) return;
+
+  // Fresh glyph for this play (ignore cache if fonts just loaded)
+  if (typeof clearGlyphCache === "function") clearGlyphCache();
+  const shared = getSharedGlyphLayer(text, size, guide || {}, styleId || "");
   if (!shared?.layer) return;
 
   const { layer } = shared;
   const analysis = analyzeGlyph(layer, size);
-  const { minX, maxX, columns } = analysis;
-  const span = Math.max(1, maxX - minX);
+  let { minX, maxX, columns } = analysis;
 
+  // Empty / failed ink bounds → just stamp the full word
+  if (maxX <= minX) {
+    const ctx0 = inkCanvas.getContext("2d");
+    const dpr0 = Math.max(1, inkCanvas.width / size);
+    ctx0.setTransform(dpr0, 0, 0, dpr0, 0, 0);
+    ctx0.clearRect(0, 0, size, size);
+    ctx0.drawImage(layer, 0, 0);
+    return;
+  }
+
+  const span = Math.max(1, maxX - minX);
   const ctx = inkCanvas.getContext("2d");
-  const dpr = inkCanvas.width / size;
+  const dpr = Math.max(0.5, inkCanvas.width / size || 1);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-  const mask = document.createElement("canvas");
-  mask.width = size;
-  mask.height = size;
-  const mctx = mask.getContext("2d");
-  const frame = document.createElement("canvas");
-  frame.width = size;
-  frame.height = size;
-  const fctx = frame.getContext("2d");
-
   const speed = Math.max(0.25, Math.min(2.5, playSpeed || 1));
-  // Longer phrases need a bit more time
   const charCount = Math.max(1, [...text.trim().replace(/\s/g, "")].length);
-  const duration = Math.max(900, (1700 + charCount * 320) / speed);
+  const duration = Math.max(900, (1600 + charCount * 300) / speed);
+  const softEdge = Math.max(12, Math.round(size * 0.04));
+  const tipR = Math.max(3.5, size * 0.014);
 
-  const softEdge = Math.max(10, Math.round(size * 0.035));
-  const tipR = Math.max(3, size * 0.012);
-
-  // Pre-clear ink canvas once
   ctx.clearRect(0, 0, size, size);
-
   const t0 = performance.now();
-  let lastFrontierX = maxX + softEdge;
 
   return new Promise((resolve) => {
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      ctx.clearRect(0, 0, size, size);
+      ctx.drawImage(layer, 0, 0);
+      resolve();
+    };
+
+    // Safety: never leave Show me stuck on “…”
+    const watchdog = setTimeout(finish, duration + 2500);
+
     const step = (now) => {
+      if (done) return;
       const u = Math.min(1, (now - t0) / duration);
-      // ease in-out
       const e = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
-      // Arabic: start at right (maxX), move left
+      // Arabic: pen starts at the RIGHT of the word and moves left
       const frontierX = Math.floor(maxX - e * (span + softEdge));
 
-      mctx.clearRect(0, 0, size, size);
-      // Reveal everything to the right of frontier (already “written”)
-      if (lastFrontierX > frontierX) {
-        const from = Math.max(minX, frontierX);
-        const to = Math.min(maxX, lastFrontierX - 1);
-        for (let x = from; x <= to; x++) {
-          const col = columns[x];
-          if (!col) continue;
-          const top = Math.max(0, col.y0 - 2);
-          const bot = Math.min(size, col.y1 + 2);
-          mctx.fillStyle = "#000";
-          mctx.fillRect(x, top, 1, bot - top);
-        }
-      }
-      lastFrontierX = frontierX;
-
-      fctx.clearRect(0, 0, size, size);
-      fctx.drawImage(layer, 0, 0);
-      fctx.globalCompositeOperation = "destination-in";
-      fctx.drawImage(mask, 0, 0);
-      fctx.globalCompositeOperation = "source-over";
-
       ctx.clearRect(0, 0, size, size);
-      ctx.drawImage(frame, 0, 0);
+      ctx.save();
+      // Reveal everything already “written”: from frontier → right edge
+      ctx.beginPath();
+      const revealLeft = Math.max(0, frontierX - softEdge * 0.25);
+      ctx.rect(revealLeft, 0, size - revealLeft + 1, size);
+      ctx.clip();
+      ctx.drawImage(layer, 0, 0);
+      ctx.restore();
 
-      // Soft pen blob at the writing tip for “hand” feel
-      const tipX = Math.max(minX, Math.min(maxX, frontierX + softEdge * 0.35));
-      const tipCol = columns[Math.round(tipX)] || columns[maxX] || null;
+      // Soft pen tip at the writing edge
+      const tipX = Math.max(minX, Math.min(maxX, frontierX + softEdge * 0.2));
+      const tipCol =
+        columns[Math.round(tipX)] ||
+        columns[Math.min(maxX, Math.round(tipX) + 1)] ||
+        columns[maxX] ||
+        null;
       const tipY = tipCol
         ? (tipCol.y0 + tipCol.y1) / 2
-        : size * PAPER_BASELINE - size * 0.08;
-      ctx.fillStyle = "rgba(20, 16, 12, 0.55)";
+        : size * PAPER_BASELINE - size * 0.06;
+      ctx.fillStyle = "rgba(20, 16, 12, 0.5)";
       ctx.beginPath();
       ctx.arc(tipX, tipY, tipR, 0, Math.PI * 2);
       ctx.fill();
 
-      if (u < 1) requestAnimationFrame(step);
-      else {
-        // Final solid glyph
-        ctx.clearRect(0, 0, size, size);
-        ctx.drawImage(layer, 0, 0);
-        resolve();
+      if (u < 1) {
+        requestAnimationFrame(step);
+      } else {
+        clearTimeout(watchdog);
+        finish();
       }
     };
     requestAnimationFrame(step);

@@ -840,6 +840,34 @@ select {
   gap: 8px;
 }
 
+.random-word-btn {
+  display: block;
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px dashed rgba(26, 23, 20, 0.22);
+  background: rgba(255, 253, 248, 0.85);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  text-align: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.random-word-btn:hover {
+  border-color: rgba(26, 23, 20, 0.4);
+  border-style: solid;
+  color: var(--ink);
+  background: #fff;
+}
+
+.random-word-btn:focus-visible {
+  outline: 2px solid rgba(139, 58, 42, 0.65);
+  outline-offset: 2px;
+}
+
 .presets-label {
   font-size: 0.72rem;
   color: var(--ink-faint);
