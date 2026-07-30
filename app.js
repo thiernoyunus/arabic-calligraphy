@@ -25,7 +25,8 @@
     surface: "plain",
     mode: "write",
     style: "naskh",
-    ghost: false,
+    /** Faint model on paper for tracing (UI label: guide) */
+    ghost: true,
     playSpeed: 1,
     teaching: false,
     showMeasures: true,
@@ -82,7 +83,7 @@
     if (wwVal) wwVal.textContent = v.toFixed(2);
   }
 
-  function setTextSize(n) {
+  function setTextSize(n, opts = {}) {
     const v = Math.max(0.5, Math.min(1.5, Number(n) || 1));
     state.textSize = v;
     const ids = [
@@ -95,8 +96,21 @@
       if (el && document.activeElement !== el) el.value = String(v);
       if (val) val.textContent = v.toFixed(2);
     }
+    // Always redraw the faint guide for the current word at the new size
     if (typeof clearGlyphCache === "function") clearGlyphCache();
-    updateGuides();
+    if (!state.ghost) {
+      setGhost(true);
+    } else if (!opts.skipDraw) {
+      updateGuides();
+    }
+  }
+
+  function bindTextSizeSlider(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const apply = () => setTextSize(el.value);
+    el.addEventListener("input", apply);
+    el.addEventListener("change", apply);
   }
 
   function bindSliders() {
@@ -112,18 +126,10 @@
       );
     }
 
-    // Text size (model on paper) — both modes
-    const textSizeEl = document.getElementById("textSize");
-    if (textSizeEl) {
-      textSizeEl.addEventListener("input", () => setTextSize(textSizeEl.value));
-    }
-    const writingTextSize = document.getElementById("writingTextSize");
-    if (writingTextSize) {
-      writingTextSize.addEventListener("input", () =>
-        setTextSize(writingTextSize.value)
-      );
-    }
-    setTextSize(state.textSize);
+    // Text size (model on paper) — both modes; updates guide live
+    bindTextSizeSlider("textSize");
+    bindTextSizeSlider("writingTextSize");
+    setTextSize(state.textSize, { skipDraw: true });
   }
 
   function bindSeg(attr, key, onChange) {
@@ -178,32 +184,46 @@
 
   const dockGhostBtn = document.getElementById("dockGhostBtn");
   const dockShowMeBtn = document.getElementById("dockShowMeBtn");
+  /** Avoid checkbox change events undoing setGhost while we sync UI */
+  let syncingGhostUi = false;
 
   function syncGhostUi() {
     if (dockGhostBtn) {
-      dockGhostBtn.classList.toggle("active", state.ghost);
+      dockGhostBtn.classList.toggle("active", !!state.ghost);
       dockGhostBtn.setAttribute("aria-pressed", state.ghost ? "true" : "false");
     }
   }
 
   function setGhost(on) {
     state.ghost = !!on;
-    if (ghostGuide) ghostGuide.checked = state.ghost;
-    if (writingGhostGuide) writingGhostGuide.checked = state.ghost;
+    syncingGhostUi = true;
+    try {
+      if (ghostGuide) ghostGuide.checked = state.ghost;
+      if (writingGhostGuide) writingGhostGuide.checked = state.ghost;
+    } finally {
+      syncingGhostUi = false;
+    }
     syncGhostUi();
     updateGuides();
   }
 
   if (ghostGuide) {
-    ghostGuide.addEventListener("change", (e) => setGhost(e.target.checked));
+    ghostGuide.addEventListener("change", (e) => {
+      if (syncingGhostUi) return;
+      setGhost(e.target.checked);
+    });
   }
   if (writingGhostGuide) {
-    writingGhostGuide.addEventListener("change", (e) =>
-      setGhost(e.target.checked)
-    );
+    writingGhostGuide.addEventListener("change", (e) => {
+      if (syncingGhostUi) return;
+      setGhost(e.target.checked);
+    });
   }
   if (dockGhostBtn) {
-    dockGhostBtn.addEventListener("click", () => setGhost(!state.ghost));
+    dockGhostBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      setGhost(!state.ghost);
+    });
   }
 
   async function runShowMe() {
@@ -416,7 +436,7 @@
     });
 
     if (state.practice === "writing") {
-      // School handwriting: Naskh only, calm lines, ghost for tracing
+      // School handwriting: Naskh only, calm lines, guide on for tracing
       applyStyle("naskh");
       setGhost(true);
       state.showMeasures = false;
@@ -436,8 +456,8 @@
       buildPracticeWords();
       updateLetterTitle();
     } else {
-      // Calligraphy: styles + keyboard + words
-      setGhost(false);
+      // Calligraphy: styles + keyboard + words (guide stays on by default)
+      setGhost(true);
       buildPresets();
       const cur = (typeInput && typeInput.value ? typeInput.value : "").trim();
       const TATWEEL_CH = "\u0640";
@@ -455,6 +475,8 @@
     }
 
     rebuildStyleButtonsForPractice();
+    // Guide stays on when switching modes (user can still turn it off)
+    setGhost(true);
     requestAnimationFrame(resize);
   }
 
@@ -893,11 +915,16 @@
     const trimmed = v.trim();
     if (!trimmed) {
       charBadge.textContent = "";
+      if (typeof clearGlyphCache === "function") clearGlyphCache();
+      updateGuides();
       return;
     }
     state.current = findLetter(trimmed);
     charBadge.textContent = state.current.char;
-    updateGuides();
+    // Typing updates the guide on the paper right away
+    if (typeof clearGlyphCache === "function") clearGlyphCache();
+    if (!state.ghost) setGhost(true);
+    else updateGuides();
     updatePresetsActive();
     updateHint();
     if (commit) {
@@ -1006,6 +1033,7 @@
   buildPresets();
   // Default path: Writing (alphabet) — most learners need this first
   setPractice("writing");
+  setGhost(true); // guide on by default in every mode
   resize();
   window.addEventListener("resize", resize);
   window.addEventListener("orientationchange", () => {

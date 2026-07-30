@@ -22,10 +22,10 @@ Those are related but **not the same class**:
 2. Practice **Alone / Start / Middle / End**  
 3. **Connect** (start → middle → end joined)  
 4. Optional practice words  
-5. Trace ghost · Show me · freehand  
+5. Trace guide · Show me · freehand  
 6. Eraser for small fixes (not only clear-all)
 
-No keyboard. Naskh only. Ghost on by default.
+No keyboard. Naskh only. Guide on by default.
 
 ## Calligraphy mode
 
@@ -36,6 +36,7 @@ No keyboard. Naskh only. Ghost on by default.
 
 ## Shared paper tools
 
-Pen · Eraser · Undo · Clear all · Show me · Ghost  
+Pen · Eraser · Undo · Clear all · Show me · Guide  
 
 Always under the paper so phone and iPad users can reach them while practicing.
+The **guide** is the faint letter/word on the paper to copy (on by default).

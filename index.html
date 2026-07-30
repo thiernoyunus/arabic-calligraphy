@@ -31,7 +31,7 @@
     href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Aref+Ruqaa:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Gulzar&family=Harmattan:wght@400;500;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500&family=Mirza:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=3" />
 </head>
 <body>
   <div class="app">
@@ -136,7 +136,7 @@
       <section class="canvas-col">
         <div class="canvas-wrap" id="canvasWrap">
           <canvas id="paper" aria-label="Practice paper"></canvas>
-          <canvas id="ghost" aria-label="Trace guide"></canvas>
+          <canvas id="ghost" aria-label="Letter guide to trace"></canvas>
           <canvas id="ink" aria-label="Ink drawing"></canvas>
           <div class="stroke-numbers" id="strokeNumbers"></div>
           <div class="char-badge" id="charBadge"></div>
@@ -167,9 +167,9 @@
               class="pill pill-toggle active"
               id="dockGhostBtn"
               aria-pressed="true"
-              title="Faint model to trace"
+              title="Show or hide the faint letter to trace"
             >
-              شبح · ghost
+              دليل · guide
             </button>
           </div>
           <div class="stroke-count" id="strokeCount" aria-live="polite">0</div>
@@ -185,7 +185,7 @@
         <section class="panel-block writing-only" id="writingTools">
           <h2 class="panel-title"><span class="glyph">تمرين</span> size</h2>
           <p class="teach-note">
-            Pen tools sit under the paper. Adjust how thick you draw and how big the model is.
+            Pen tools sit under the paper. Text size changes the guide letter right away.
           </p>
           <label class="slider-row">
             <span class="slider-label">pen size</span>
@@ -197,7 +197,7 @@
             <input type="range" id="writingTextSize" min="0.5" max="1.5" step="0.05" value="1" />
             <span class="slider-val" id="writingTextSizeVal">1.00</span>
           </label>
-          <p class="teach-note subtle">Long words shrink to fit the paper automatically.</p>
+          <p class="teach-note subtle">Long words shrink to fit. Guide stays on while you practice.</p>
           <button type="button" id="writingShowMeBtn" class="visually-hidden" tabindex="-1" aria-hidden="true">show me</button>
           <input type="checkbox" id="writingGhostGuide" checked class="visually-hidden" tabindex="-1" aria-hidden="true" />
         </section>
@@ -224,7 +224,7 @@
               <span class="slider-val" id="textSizeVal">1.00</span>
             </label>
             <p class="teach-note subtle">
-              Phrases with several words shrink or wrap so they stay on the paper.
+              Changes the guide on the paper. Long phrases shrink or wrap to fit.
             </p>
 
             <div class="field" style="margin-top: 12px">
@@ -239,7 +239,7 @@
           <section class="panel-block">
             <h2 class="panel-title"><span class="glyph">أرني</span> show me</h2>
             <p class="teach-note subtle">
-              Show me, ghost, pen, and eraser are under the paper while you draw.
+              Show me, guide, pen, and eraser are under the paper while you draw.
             </p>
             <button type="button" class="teach-play" id="teachPlayBtn">
               أرني · show me
@@ -251,12 +251,12 @@
     </main>
   </div>
 
-  <script src="letters.js"></script>
-  <script src="forms.js"></script>
-  <script src="styles.js"></script>
-  <script src="glyph.js"></script>
-  <script src="brush.js"></script>
-  <script src="keyboard.js"></script>
-  <script src="app.js"></script>
+  <script src="letters.js?v=3"></script>
+  <script src="forms.js?v=3"></script>
+  <script src="styles.js?v=3"></script>
+  <script src="glyph.js?v=3"></script>
+  <script src="brush.js?v=3"></script>
+  <script src="keyboard.js?v=3"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>

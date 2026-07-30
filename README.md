@@ -8,7 +8,7 @@ Two paths, one paper:
 |--|---------------------|----------------------|
 | **Who** | Learning the alphabet | Practicing pen styles |
 | **What** | Letter forms (alone / start / middle / end), connect drills, practice words | Naskh, Ruqʿah, Thuluth, Kufic, Nastaʿliq, and more |
-| **How** | Clear school **Naskh**, ghost to trace, Show me | Style-aware pen feel, keyboard, free composition |
+| **How** | Clear school **Naskh**, guide to trace, Show me | Style-aware pen feel, keyboard, free composition |
 
 Built for **phone, iPad (Safari + Apple Pencil), and desktop** — no install required.
 
@@ -36,7 +36,7 @@ Or open `index.html` directly (some browsers restrict fonts without a local serv
 - **Alone · Start · Middle · End** forms for each letter  
 - **Connect** drill (e.g. ببب) so you see start → middle → end joined  
 - Practice words per letter  
-- Ghost outline + **Show me** (shape, right → left)  
+- **Guide** outline (on by default) + **Show me** (shape, right → left)  
 - Pen, **eraser** (scrub one area), undo, clear all  
 
 ### Calligraphy mode
@@ -46,7 +46,7 @@ Or open `index.html` directly (some browsers restrict fonts without a local serv
 - Same draw / erase / undo tools  
 
 ### Paper tools (always under the canvas)
-- **Pen** · **Eraser** · **Undo** · **Clear all** · **Show me** · **Ghost**
+- **Pen** · **Eraser** · **Undo** · **Clear all** · **Show me** · **Guide**
 
 ---
 
@@ -60,7 +60,7 @@ Plain **HTML, CSS, and JavaScript**. No build step, no framework, no npm install
 | `styles.css` | Layout + responsive UI |
 | `app.js` | Modes, forms, UI wiring |
 | `brush.js` | Reed-pen drawing engine |
-| `glyph.js` | Ghost outline + Show me animation |
+| `glyph.js` | Guide outline + Show me animation |
 | `forms.js` | Alphabet, four forms, connect, practice words |
 | `styles.js` | Calligraphy style profiles |
 | `letters.js` | Letter tips / presets |
