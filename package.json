@@ -4,7 +4,7 @@
   "private": true,
   "description": "Interactive Arabic calligraphy drawing app",
   "scripts": {
-    "build": "mkdir -p dist dist/server && cp index.html styles.css app.js brush.js forms.js glyph.js keyboard.js letters.js styles.js manifest.webmanifest dist/ && cp -r assets dist/ && cp server/index.js dist/server/ && cp .openai/hosting.json dist/"
+    "build": "mkdir -p dist dist/server && cp index.html styles.css app.js brush.js forms.js glyph.js keyboard.js letters.js styles.js manifest.webmanifest dist/ && cp -r assets dist/ && cp server/index.js dist/server/ && mkdir -p dist/.openai && cp .openai/hosting.json dist/.openai/"
   },
   "files": [
     "dist"
