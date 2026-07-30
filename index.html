@@ -183,15 +183,21 @@
       <!-- Right tools -->
       <aside class="panel" dir="ltr">
         <section class="panel-block writing-only" id="writingTools">
-          <h2 class="panel-title"><span class="glyph">تمرين</span> pen size</h2>
+          <h2 class="panel-title"><span class="glyph">تمرين</span> size</h2>
           <p class="teach-note">
-            Pen, eraser, undo, show me, and ghost sit under the paper. Size only here.
+            Pen tools sit under the paper. Adjust how thick you draw and how big the model is.
           </p>
           <label class="slider-row">
             <span class="slider-label">pen size</span>
             <input type="range" id="writingWeight" min="0" max="1" step="0.01" value="0.5" />
             <span class="slider-val" id="writingWeightVal">0.50</span>
           </label>
+          <label class="slider-row">
+            <span class="slider-label">text size</span>
+            <input type="range" id="writingTextSize" min="0.5" max="1.5" step="0.05" value="1" />
+            <span class="slider-val" id="writingTextSizeVal">1.00</span>
+          </label>
+          <p class="teach-note subtle">Long words shrink to fit the paper automatically.</p>
           <button type="button" id="writingShowMeBtn" class="visually-hidden" tabindex="-1" aria-hidden="true">show me</button>
           <input type="checkbox" id="writingGhostGuide" checked class="visually-hidden" tabindex="-1" aria-hidden="true" />
         </section>
@@ -212,6 +218,14 @@
               <input type="range" id="weight" min="0" max="1" step="0.01" value="0.5" />
               <span class="slider-val" id="weightVal">0.50</span>
             </label>
+            <label class="slider-row">
+              <span class="slider-label">text size</span>
+              <input type="range" id="textSize" min="0.5" max="1.5" step="0.05" value="1" />
+              <span class="slider-val" id="textSizeVal">1.00</span>
+            </label>
+            <p class="teach-note subtle">
+              Phrases with several words shrink or wrap so they stay on the paper.
+            </p>
 
             <div class="field" style="margin-top: 12px">
               <span class="field-label">paper</span>

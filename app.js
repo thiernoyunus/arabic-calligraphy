@@ -37,6 +37,8 @@
     drillKind: "chain",
     /** practice word string when drillKind === 'word' */
     wordPractice: null,
+    /** Model text size on paper (1 = default; long phrases still auto-fit) */
+    textSize: 1,
     current: findLetter("ببب"),
     kbOpen: true,
   };
@@ -80,6 +82,23 @@
     if (wwVal) wwVal.textContent = v.toFixed(2);
   }
 
+  function setTextSize(n) {
+    const v = Math.max(0.5, Math.min(1.5, Number(n) || 1));
+    state.textSize = v;
+    const ids = [
+      ["textSize", "textSizeVal"],
+      ["writingTextSize", "writingTextSizeVal"],
+    ];
+    for (const [id, valId] of ids) {
+      const el = document.getElementById(id);
+      const val = document.getElementById(valId);
+      if (el && document.activeElement !== el) el.value = String(v);
+      if (val) val.textContent = v.toFixed(2);
+    }
+    if (typeof clearGlyphCache === "function") clearGlyphCache();
+    updateGuides();
+  }
+
   function bindSliders() {
     const main = document.getElementById("weight");
     if (main) {
@@ -92,6 +111,19 @@
         setPenSize(writingWeight.value)
       );
     }
+
+    // Text size (model on paper) — both modes
+    const textSizeEl = document.getElementById("textSize");
+    if (textSizeEl) {
+      textSizeEl.addEventListener("input", () => setTextSize(textSizeEl.value));
+    }
+    const writingTextSize = document.getElementById("writingTextSize");
+    if (writingTextSize) {
+      writingTextSize.addEventListener("input", () =>
+        setTextSize(writingTextSize.value)
+      );
+    }
+    setTextSize(state.textSize);
   }
 
   function bindSeg(attr, key, onChange) {
@@ -758,17 +790,30 @@
     btn.addEventListener("click", () => setPractice(btn.dataset.practice));
   });
 
+  /** Guide options including user text size (for multi-word fit). */
+  function activeGuide() {
+    const profile = getStyleProfile(state.style);
+    const g = { ...(profile.guide || {}) };
+    g.userScale = state.textSize != null ? state.textSize : 1;
+    return { profile, guide: g };
+  }
+
   function updateGuides() {
     // Ghost uses the SAME bitmap as Show me (shared cache) — no double-draw offset
     // Hide while Show me is running so you never see two copies at once
     const visible =
       !state.teaching && (state.mode === "trace" || state.ghost);
     const ch = state.current?.char || "";
-    const profile = getStyleProfile(state.style);
-    const g = profile.guide || {};
+    const { profile, guide: g } = activeGuide();
     const size = Math.round(cssSize() || 400);
 
-    charBadge.textContent = ch;
+    // Badge: short label for long phrases
+    if (charBadge) {
+      const short =
+        ch.length > 18 ? [...ch].slice(0, 14).join("") + "…" : ch;
+      charBadge.textContent = short;
+      charBadge.title = ch;
+    }
 
     if (!ghostCanvas) return;
     const gctx = ghostCanvas.getContext("2d");
@@ -912,8 +957,7 @@
     ).trim();
     if (!text) return;
 
-    const profile = getStyleProfile(state.style);
-    const g = profile.guide || {};
+    const { profile, guide: g } = activeGuide();
     const family = g.fontFamily || '"Noto Naskh Arabic", serif';
     const weight = g.fontWeight || "500";
 
