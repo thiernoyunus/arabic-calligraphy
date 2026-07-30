@@ -1,11 +1,4 @@
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
-
-const DIST = path.join(__dirname, '..', 'dist');
-const PORT = parseInt(process.env.PORT || '3000', 10);
-const HOST = process.env.HOST || '0.0.0.0';
-
+// Cloudflare Workers static file server
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -13,31 +6,28 @@ const MIME = {
   '.json': 'application/json',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.gif': 'image/gif',
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
   '.webmanifest': 'application/manifest+json',
-  '.woff': 'font/woff',
-  '.woff2': 'font/woff2',
 };
 
-const server = http.createServer((req, res) => {
-  let filePath = path.join(DIST, req.url === '/' ? 'index.html' : req.url);
-  const ext = path.extname(filePath);
-  const contentType = MIME[ext] || 'application/octet-stream';
+export default {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+    let pathname = url.pathname;
+    if (pathname === '/') pathname = '/index.html';
 
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
-      res.writeHead(404, { 'Content-Type': 'text/plain' });
-      res.end('Not Found');
-      return;
+    // Try to serve from Cloudflare Workers KV or static assets
+    // Fallback: proxy to the Pages/Assets handler
+    const ext = pathname.match(/\.\w+$/)?.[0] || '';
+    const contentType = MIME[ext] || 'application/octet-stream';
+
+    try {
+      // For Cloudflare Pages, proxy to built-in asset handling
+      const response = await env.ASSETS.fetch(request);
+      return response;
+    } catch {
+      return new Response('Not Found', { status: 404 });
     }
-    res.writeHead(200, { 'Content-Type': contentType });
-    res.end(data);
-  });
-});
-
-server.listen(PORT, HOST, () => {
-  console.log(`Server running at http://${HOST}:${PORT}/`);
-});
+  },
+};
