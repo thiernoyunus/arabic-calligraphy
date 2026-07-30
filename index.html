@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Ink" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="theme-color" content="#f3efe6" />
+  <meta name="color-scheme" content="light" />
+  <meta
+    name="description"
+    content="حبر · Ink — practice Arabic writing and calligraphy. Learn letter forms (alone, start, middle, end), connect drills, and classic pen styles on paper."
+  />
+  <meta property="og:title" content="حبر · Ink — Arabic writing & calligraphy" />
+  <meta
+    property="og:description"
+    content="Practice the Arabic alphabet and calligraphy in your browser. Writing mode for learners; calligraphy mode for pen styles."
+  />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <title>حبر · Ink — Arabic writing & calligraphy</title>
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/icon.svg" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Aref+Ruqaa:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Gulzar&family=Harmattan:wght@400;500;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500&family=Mirza:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="title-block">
+      <div class="title">
+        <span class="title-ar">حبر</span>
+        <span class="title-en">Ink</span>
+      </div>
+      <nav class="practice-modes" role="tablist" aria-label="Practice path">
+        <button
+          type="button"
+          class="mode-btn active"
+          role="tab"
+          id="modeWriting"
+          data-practice="writing"
+          aria-selected="true"
+        >
+          <span class="mode-ar">كتابة</span>
+          <span class="mode-en">Writing</span>
+          <span class="mode-sub">learn the alphabet</span>
+        </button>
+        <button
+          type="button"
+          class="mode-btn"
+          role="tab"
+          id="modeCalligraphy"
+          data-practice="calligraphy"
+          aria-selected="false"
+        >
+          <span class="mode-ar">خط</span>
+          <span class="mode-en">Calligraphy</span>
+          <span class="mode-sub">styles of the pen</span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- Writing: letter picker -->
+    <div class="alphabet-strip writing-only" id="alphabetStrip" aria-label="Arabic alphabet"></div>
+
+    <main class="workspace">
+      <aside class="kb-rail" id="kbDock" aria-label="Practice tools">
+        <!-- Writing lesson -->
+        <div class="writing-rail writing-only" id="writingRail">
+          <div class="letter-title" id="letterTitle">
+            <span class="letter-title-ar" id="letterTitleAr">باء</span>
+            <span class="letter-title-en" id="letterTitleEn">ba</span>
+          </div>
+
+          <p class="forms-note" id="formsNote">
+            Pick a form, or Connect to see start → middle → end joined — then trace.
+          </p>
+
+          <div class="forms-block">
+            <div class="presets-label">forms · أشكال</div>
+            <div class="forms-grid" id="formsGrid"></div>
+          </div>
+
+          <div class="practice-words-block">
+            <div class="presets-label">words · كلمات</div>
+            <div class="practice-words" id="practiceWords"></div>
+          </div>
+        </div>
+
+        <!-- Calligraphy: type + words + keyboard -->
+        <div class="calligraphy-only">
+          <div class="kb-rail-head">
+            <div class="kb-rail-title">
+              <strong>لوحة</strong>
+              <span>keyboard</span>
+            </div>
+            <button type="button" class="pill kb-toggle" id="kbToggle" aria-expanded="true">
+              إخفاء · hide
+            </button>
+          </div>
+
+          <label class="field-input" for="typeInput">
+            <input
+              id="typeInput"
+              type="text"
+              dir="rtl"
+              lang="ar"
+              inputmode="none"
+              placeholder="اكتب · type"
+              autocomplete="off"
+              spellcheck="false"
+              enterkeyhint="done"
+            />
+          </label>
+
+          <div class="presets-block" id="presetsBlock">
+            <div class="presets-label">words · كلمات</div>
+            <div class="presets" id="presets"></div>
+          </div>
+
+          <div class="keyboard-block">
+            <div id="arabicKeyboard" class="ar-keyboard-host"></div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Paper -->
+      <section class="canvas-col">
+        <div class="canvas-wrap" id="canvasWrap">
+          <canvas id="paper" aria-label="Practice paper"></canvas>
+          <canvas id="ghost" aria-label="Trace guide"></canvas>
+          <canvas id="ink" aria-label="Ink drawing"></canvas>
+          <div class="stroke-numbers" id="strokeNumbers"></div>
+          <div class="char-badge" id="charBadge"></div>
+        </div>
+
+        <!-- Dock under paper: tools you need while writing -->
+        <div class="canvas-footer" id="canvasFooter">
+          <div class="tool-seg" role="group" aria-label="Drawing tool">
+            <button type="button" class="tool-btn active" id="penToolBtn" data-tool="ink" aria-pressed="true">
+              قلم · pen
+            </button>
+            <button type="button" class="tool-btn" id="eraseToolBtn" data-tool="erase" aria-pressed="false">
+              ممحاة · eraser
+            </button>
+          </div>
+          <div class="footer-actions">
+            <button type="button" class="pill" id="undoBtn" title="Remove last stroke">
+              تراجع · undo
+            </button>
+            <button type="button" class="pill" id="clearBtn" title="Clear the whole paper">
+              مسح الكل · clear all
+            </button>
+            <button type="button" class="pill pill-accent" id="dockShowMeBtn">
+              أرني · show me
+            </button>
+            <button
+              type="button"
+              class="pill pill-toggle active"
+              id="dockGhostBtn"
+              aria-pressed="true"
+              title="Faint model to trace"
+            >
+              شبح · ghost
+            </button>
+          </div>
+          <div class="stroke-count" id="strokeCount" aria-live="polite">0</div>
+        </div>
+
+        <p class="hint" id="hint" hidden>
+          <span id="hintText"></span>
+        </p>
+      </section>
+
+      <!-- Right tools -->
+      <aside class="panel" dir="ltr">
+        <section class="panel-block writing-only" id="writingTools">
+          <h2 class="panel-title"><span class="glyph">تمرين</span> pen size</h2>
+          <p class="teach-note">
+            Pen, eraser, undo, show me, and ghost sit under the paper. Size only here.
+          </p>
+          <label class="slider-row">
+            <span class="slider-label">pen size</span>
+            <input type="range" id="writingWeight" min="0" max="1" step="0.01" value="0.5" />
+            <span class="slider-val" id="writingWeightVal">0.50</span>
+          </label>
+          <button type="button" id="writingShowMeBtn" class="visually-hidden" tabindex="-1" aria-hidden="true">show me</button>
+          <input type="checkbox" id="writingGhostGuide" checked class="visually-hidden" tabindex="-1" aria-hidden="true" />
+        </section>
+
+        <div class="calligraphy-only">
+          <section class="panel-block">
+            <h2 class="panel-title"><span class="glyph">قلم</span> style</h2>
+            <p class="teach-note subtle" id="styleHint">
+              Pick a real script family. Naskh is the clear everyday hand.
+            </p>
+            <div class="seg wrap styles" id="styleSeg" role="group" aria-label="style"></div>
+          </section>
+
+          <section class="panel-block">
+            <h2 class="panel-title"><span class="glyph">حبر</span> pen</h2>
+            <label class="slider-row">
+              <span class="slider-label">pen size</span>
+              <input type="range" id="weight" min="0" max="1" step="0.01" value="0.5" />
+              <span class="slider-val" id="weightVal">0.50</span>
+            </label>
+
+            <div class="field" style="margin-top: 12px">
+              <span class="field-label">paper</span>
+              <div class="seg" role="group" aria-label="surface">
+                <button type="button" class="seg-btn active" data-surface="plain">plain</button>
+                <button type="button" class="seg-btn" data-surface="grid">lines</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel-block">
+            <h2 class="panel-title"><span class="glyph">أرني</span> show me</h2>
+            <p class="teach-note subtle">
+              Show me, ghost, pen, and eraser are under the paper while you draw.
+            </p>
+            <button type="button" class="teach-play" id="teachPlayBtn">
+              أرني · show me
+            </button>
+            <input type="checkbox" id="ghostGuide" class="visually-hidden" tabindex="-1" aria-hidden="true" />
+          </section>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script src="letters.js"></script>
+  <script src="forms.js"></script>
+  <script src="styles.js"></script>
+  <script src="glyph.js"></script>
+  <script src="brush.js"></script>
+  <script src="keyboard.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

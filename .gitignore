@@ -1,0 +1,11 @@
+.DS_Store
+*.log
+.grok/
+.idea/
+.vscode/
+node_modules/
+.cache/
+dist/
+*.local
+.env
+.env.*

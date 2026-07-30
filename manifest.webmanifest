@@ -1,0 +1,20 @@
+{
+  "name": "حبر · Ink",
+  "short_name": "Ink",
+  "description": "Practice Arabic writing and calligraphy on paper — alphabet forms, connect drills, and classic pen styles.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f3efe6",
+  "theme_color": "#f3efe6",
+  "lang": "en",
+  "dir": "ltr",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

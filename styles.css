@@ -1,0 +1,1641 @@
+:root {
+  --bg: #f3efe6;
+  --paper: #f7f2e8;
+  --ink: #1a1714;
+  --ink-soft: rgba(26, 23, 20, 0.62);
+  --ink-faint: rgba(26, 23, 20, 0.28);
+  --ink-ghost: rgba(26, 23, 20, 0.12);
+  --line: rgba(26, 23, 20, 0.1);
+  --accent: #8b3a2a;
+  --accent-soft: rgba(139, 58, 42, 0.55);
+  --panel-w: 220px;
+  --kb-w: 280px;
+  --canvas: min(58vmin, 520px);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Safe areas for notched iPhone / home indicator */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --tap: 44px; /* Apple HIG minimum touch target */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "IBM Plex Sans Arabic", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* Stop iOS from inflating text */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  /* Overscroll bounce on iOS can feel nicer with this */
+  overscroll-behavior-x: none;
+}
+
+button, input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* Inputs on iOS: avoid auto-zoom (font-size < 16px triggers zoom) */
+input,
+textarea,
+select {
+  font-size: 16px;
+}
+
+/* ── Shell — calm centered studio ── */
+.app {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding:
+    max(20px, var(--safe-top))
+    max(16px, var(--safe-right))
+    max(28px, var(--safe-bottom))
+    max(16px, var(--safe-left));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 100vw;
+}
+
+.title-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  width: min(100%, 520px);
+}
+
+.title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  user-select: none;
+  direction: ltr;
+}
+
+.title-ar {
+  font-family: "Amiri", serif;
+  font-size: 2rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.title-en {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 2rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+/* Practice path: Writing vs Calligraphy */
+.practice-modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+}
+
+.mode-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(26, 23, 20, 0.12);
+  background: rgba(255, 253, 248, 0.55);
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mode-btn:hover {
+  border-color: rgba(26, 23, 20, 0.22);
+  background: rgba(255, 253, 248, 0.95);
+}
+
+.mode-btn.active {
+  border-color: rgba(26, 23, 20, 0.45);
+  background: #fffdf8;
+  box-shadow:
+    0 2px 10px rgba(60, 40, 20, 0.07),
+    inset 0 0 0 1px rgba(26, 23, 20, 0.06);
+}
+
+.mode-btn:not(.active) {
+  opacity: 0.78;
+}
+
+.mode-btn:not(.active):hover {
+  opacity: 1;
+}
+
+.mode-ar {
+  font-family: "Amiri", serif;
+  font-size: 1.2rem;
+  color: var(--ink);
+  line-height: 1.15;
+  display: block;
+}
+
+.mode-en {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1rem;
+  color: var(--ink-soft);
+  display: block;
+  line-height: 1.2;
+}
+
+.mode-sub {
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+  margin-top: 3px;
+  line-height: 1.35;
+  display: block;
+}
+
+.mode-btn.active .mode-en {
+  color: var(--ink);
+}
+
+.mode-btn.active .mode-sub {
+  color: var(--ink-soft);
+}
+
+/* ── Mode visibility: writing-only vs calligraphy-only ── */
+.writing-only {
+  display: none;
+}
+
+.calligraphy-only {
+  display: none;
+}
+
+.app.is-writing .writing-only {
+  display: flex;
+}
+
+.app.is-calligraphy .calligraphy-only {
+  display: flex;
+}
+
+/* Alphabet strip sits above workspace — always column flex when writing */
+.app.is-writing .alphabet-strip.writing-only {
+  display: flex;
+}
+
+/* Writing lesson rail */
+.app.is-writing .writing-rail.writing-only {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+}
+
+/* Writing tools panel block */
+.app.is-writing #writingTools.writing-only {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Calligraphy chrome stacks as column */
+.app.is-calligraphy .calligraphy-only {
+  flex-direction: column;
+  gap: 12px;
+}
+
+.app.is-calligraphy .panel > .calligraphy-only {
+  gap: 0;
+}
+
+/* ── Alphabet strip (Writing, full width) ── */
+.alphabet-strip {
+  width: min(100%, 1180px);
+  margin: 0 auto 18px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(26, 23, 20, 0.08);
+  background: rgba(255, 253, 248, 0.7);
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  direction: rtl;
+}
+
+.alphabet-btn {
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-family: "Noto Naskh Arabic", "Amiri", serif;
+  font-size: 1.3rem;
+  color: var(--ink-soft);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.12s, border-color 0.12s, color 0.12s, box-shadow 0.12s;
+}
+
+.alphabet-btn:hover {
+  background: rgba(26, 23, 20, 0.05);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.alphabet-btn.active {
+  background: #fff;
+  border-color: rgba(26, 23, 20, 0.35);
+  color: var(--ink);
+  box-shadow: 0 1px 6px rgba(60, 40, 20, 0.08);
+}
+
+/* ── Writing lesson rail ── */
+.writing-rail {
+  flex-direction: column;
+  gap: 14px;
+}
+
+.letter-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 4px;
+}
+
+.letter-title-ar {
+  font-family: "Noto Naskh Arabic", "Amiri", serif;
+  font-size: 1.55rem;
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.letter-title-en {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  text-transform: lowercase;
+}
+
+.forms-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.forms-note {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--ink-faint);
+}
+
+.forms-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.form-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 76px;
+  padding: 8px 6px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(26, 23, 20, 0.1);
+  background: #fffdf8;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.form-card:hover {
+  border-color: rgba(26, 23, 20, 0.22);
+}
+
+.form-card.active {
+  border-color: rgba(26, 23, 20, 0.4);
+  box-shadow: 0 0 0 1px rgba(26, 23, 20, 0.08);
+  background: #fff;
+}
+
+/* Connect card: full width under the 2×2 form grid */
+.form-card.form-card-chain {
+  grid-column: 1 / -1;
+  min-height: 64px;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 10px 14px;
+  gap: 12px;
+  background: rgba(255, 253, 248, 0.95);
+}
+
+.form-card.form-card-chain .form-glyph {
+  font-size: 1.85rem;
+  min-height: auto;
+}
+
+.form-card.form-card-chain .form-meta {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.form-glyph {
+  /* Same clear school Naskh as the practice paper */
+  font-family: "Noto Naskh Arabic", "Amiri", serif;
+  font-size: 1.7rem;
+  line-height: 1.15;
+  color: var(--ink);
+  min-height: 1.25em;
+  direction: rtl;
+  font-weight: 500;
+}
+
+.form-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.form-label-ar {
+  font-family: "Amiri", serif;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.form-label-en {
+  font-size: 0.68rem;
+  color: var(--ink-faint);
+  letter-spacing: 0.02em;
+}
+
+.form-card.is-same .form-glyph {
+  opacity: 0.75;
+}
+
+/* Practice words row */
+.practice-words-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.practice-words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  direction: rtl;
+}
+
+.practice-word-btn {
+  min-height: 40px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(26, 23, 20, 0.1);
+  background: #fffdf8;
+  /* Same clear school Naskh as the paper — not calligraphic Amiri */
+  font-family: "Noto Naskh Arabic", "Amiri", serif;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
+}
+
+.practice-word-btn:hover,
+.practice-word-btn.active {
+  border-color: rgba(26, 23, 20, 0.3);
+  color: var(--ink);
+  background: #fff;
+}
+
+/* Writing tools (right rail, slim) */
+.writing-tools-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.writing-tools-actions .pill {
+  flex: 1;
+  text-align: center;
+}
+
+/* Writing mode defaults (desktop sizes applied in min-width queries below) */
+.app.is-writing {
+  --kb-w: 250px;
+  --panel-w: 170px;
+  --canvas: min(92vw, 400px);
+}
+
+.app.is-writing .title-block {
+  margin-bottom: 12px;
+}
+
+/* Tools live in the right rail — quieter under-paper chrome */
+.app.is-writing .canvas-footer {
+  opacity: 0.55;
+}
+
+.app.is-writing .hint {
+  max-width: var(--canvas);
+  font-size: 0.78rem;
+}
+
+/* Connect is the star action in the lesson rail */
+.form-card.form-card-chain.active {
+  border-color: rgba(139, 58, 42, 0.45);
+  box-shadow: 0 0 0 1px rgba(139, 58, 42, 0.12);
+}
+
+.form-card.form-card-chain .form-label-en {
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+/* ── Workspace: mobile-first single column, then multi-column on desktop ── */
+.workspace {
+  width: min(100%, 1180px);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  align-items: start;
+  justify-items: stretch;
+  direction: ltr;
+}
+
+/* Paper first on narrow screens; forms before secondary pen-size panel */
+.canvas-col { order: 1; }
+.kb-rail { order: 2; }   /* Writing forms / Calligraphy keyboard next */
+.panel { order: 3; }     /* Extra settings last */
+
+@media (min-width: 901px) {
+  .workspace {
+    grid-template-columns: var(--kb-w) 1fr var(--panel-w);
+    gap: 36px;
+    justify-items: stretch;
+  }
+
+  .app.is-writing .workspace {
+    grid-template-columns: var(--kb-w) 1fr var(--panel-w);
+    gap: 24px;
+  }
+
+  .app.is-writing {
+    --canvas: min(64vmin, 560px);
+  }
+
+  /* Restore natural document order on desktop */
+  .canvas-col,
+  .panel,
+  .kb-rail {
+    order: initial;
+  }
+}
+
+/* ── Center: paper ── */
+.canvas-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  justify-self: center;
+}
+
+.canvas-wrap {
+  position: relative;
+  width: var(--canvas);
+  height: var(--canvas);
+  background: var(--paper);
+  box-shadow:
+    0 0 0 1px rgba(26, 23, 20, 0.06),
+    0 18px 50px rgba(60, 40, 20, 0.06);
+  touch-action: none;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#paper,
+#ghost,
+#ink {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#ghost {
+  z-index: 1;
+  pointer-events: none;
+}
+
+#ink {
+  cursor: crosshair;
+  z-index: 2;
+  touch-action: none;
+}
+
+.stroke-numbers {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.stroke-numbers .num {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid var(--accent-soft);
+  color: var(--accent);
+  font-size: 10px;
+  font-family: "Cormorant Garamond", serif;
+  display: grid;
+  place-items: center;
+  background: rgba(247, 242, 232, 0.85);
+  transform: translate(-50%, -50%);
+}
+
+.char-badge {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 3;
+  font-family: "Amiri", serif;
+  font-size: 1.35rem;
+  color: var(--ink-faint);
+  pointer-events: none;
+}
+
+.canvas-footer {
+  width: var(--canvas);
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  direction: ltr;
+}
+
+.footer-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Pen / Eraser switch — right under the paper */
+.tool-seg {
+  display: inline-flex;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 253, 248, 0.9);
+  padding: 3px;
+  gap: 2px;
+}
+
+.tool-btn {
+  min-height: 36px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.12s, color 0.12s;
+}
+
+.tool-btn.active {
+  background: var(--ink);
+  color: #f7f2e8;
+}
+
+.tool-btn:not(.active):hover {
+  color: var(--ink);
+  background: rgba(26, 23, 20, 0.05);
+}
+
+.pill-accent {
+  border-color: rgba(139, 58, 42, 0.35);
+  color: var(--accent);
+}
+
+.pill-accent:hover {
+  background: rgba(139, 58, 42, 0.08);
+  border-color: rgba(139, 58, 42, 0.5);
+  color: var(--accent);
+}
+
+.pill-toggle.active {
+  background: rgba(26, 23, 20, 0.1);
+  border-color: rgba(26, 23, 20, 0.28);
+  color: var(--ink);
+}
+
+#ink.is-erasing {
+  cursor: cell;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Focus rings for keyboard / a11y */
+.mode-btn:focus-visible,
+.tool-btn:focus-visible,
+.pill:focus-visible,
+.form-card:focus-visible,
+.alphabet-btn:focus-visible,
+.teach-play:focus-visible,
+.seg-btn:focus-visible,
+.practice-word-btn:focus-visible {
+  outline: 2px solid rgba(139, 58, 42, 0.65);
+  outline-offset: 2px;
+}
+
+.pill {
+  padding: 6px 14px;
+  min-height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  letter-spacing: 0.01em;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pill:hover {
+  background: rgba(26, 23, 20, 0.04);
+  border-color: rgba(26, 23, 20, 0.18);
+  color: var(--ink);
+}
+
+.stroke-count {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 0.95rem;
+  color: var(--ink-faint);
+  min-width: 1.5ch;
+  text-align: right;
+}
+
+.hint {
+  width: var(--canvas);
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  margin-inline-start: 4px;
+}
+
+/* ── Left rail: keyboard ── */
+.kb-rail {
+  width: 100%;
+  min-width: 0;
+  padding-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  padding-inline-end: 4px;
+}
+
+.kb-rail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  direction: ltr;
+}
+
+.kb-rail-title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.kb-rail-title strong {
+  font-family: "Amiri", serif;
+  font-size: 1.15rem;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.kb-rail-title span {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 0.95rem;
+  color: var(--ink-faint);
+}
+
+.kb-toggle {
+  flex-shrink: 0;
+  font-size: 0.7rem !important;
+  padding: 5px 10px !important;
+  min-height: 30px;
+}
+
+.kb-rail.is-collapsed .keyboard-block,
+.kb-rail.is-collapsed .presets-block {
+  display: none;
+}
+
+.field-input {
+  display: block;
+}
+
+#typeInput {
+  width: 100%;
+  text-align: center;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  /* ≥16px so iOS Safari won’t zoom when focusing the field */
+  font-size: max(16px, 1.15rem);
+  min-height: var(--tap);
+  padding: 10px 12px;
+  font-family: "Amiri", serif;
+  font-size: 1.2rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+  min-height: 44px;
+}
+
+#typeInput::placeholder {
+  font-family: "IBM Plex Sans Arabic", sans-serif;
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+}
+
+#typeInput:focus {
+  border-color: rgba(26, 23, 20, 0.28);
+}
+
+.presets-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.presets-label {
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+}
+
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.preset {
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-family: "Amiri", serif;
+  font-size: 1.15rem;
+  color: var(--ink-soft);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.preset:hover,
+.preset.active {
+  background: rgba(26, 23, 20, 0.04);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.keyboard-block {
+  min-width: 0;
+}
+
+.ar-keyboard-host {
+  width: 100%;
+}
+
+.ar-keyboard {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.ar-kb-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  order: 2;
+  margin-top: 2px;
+}
+
+.ar-kb-hint {
+  display: none;
+}
+
+.ar-kb-chip {
+  min-height: 28px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ar-kb-chip.active,
+.ar-kb-chip:hover {
+  border-color: rgba(26, 23, 20, 0.22);
+  color: var(--ink);
+  background: rgba(26, 23, 20, 0.04);
+}
+
+.ar-kb-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  order: 1;
+}
+
+.ar-kb-row {
+  display: flex;
+  justify-content: stretch;
+  gap: 3px;
+  flex-wrap: nowrap;
+}
+
+.ar-kb-row.actions {
+  margin-top: 2px;
+  gap: 4px;
+}
+
+.ar-kb-row.marks {
+  flex-wrap: wrap;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--line);
+}
+
+.ar-key {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 36px;
+  padding: 0 1px;
+  border-radius: 7px;
+  border: 1px solid rgba(26, 23, 20, 0.1);
+  background: rgba(255, 253, 248, 0.9);
+  font-family: "Amiri", serif;
+  font-size: 1.05rem;
+  line-height: 1;
+  color: var(--ink);
+  box-shadow: 0 1px 0 rgba(26, 23, 20, 0.04);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.1s, transform 0.08s;
+}
+
+.ar-key:active {
+  background: rgba(26, 23, 20, 0.08);
+  transform: scale(0.97);
+}
+
+.ar-key.wide {
+  flex: 1.25 1 0;
+  font-family: "IBM Plex Sans Arabic", sans-serif;
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+}
+
+.ar-key.action {
+  background: rgba(26, 23, 20, 0.03);
+  font-family: "IBM Plex Sans Arabic", sans-serif;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+.ar-key.action.active {
+  border-color: rgba(139, 58, 42, 0.35);
+  color: var(--accent);
+  background: rgba(139, 58, 42, 0.06);
+}
+
+/* ── Right panel ── */
+.panel {
+  padding-top: 8px;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+}
+
+.panel-block + .panel-block {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.panel-title {
+  margin: 0 0 14px;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--ink);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.panel-title .glyph {
+  font-family: "Amiri", serif;
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+}
+
+.slider-row {
+  display: grid;
+  grid-template-columns: 72px 1fr 36px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.slider-label {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+.slider-val {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 0.85rem;
+  text-align: right;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 18px;
+  background: transparent;
+  margin: 0;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 1px;
+  background: rgba(26, 23, 20, 0.18);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 11px;
+  height: 11px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: none;
+  box-shadow: 0 0 0 3px var(--bg);
+  cursor: grab;
+}
+
+input[type="range"]::-moz-range-track {
+  height: 1px;
+  background: rgba(26, 23, 20, 0.18);
+  border: none;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: none;
+  cursor: grab;
+}
+
+.field {
+  margin-bottom: 16px;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+}
+
+.seg {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.seg.wrap {
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.seg-btn {
+  padding: 0;
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+  border-bottom: 1px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.seg-btn:hover {
+  color: var(--ink-soft);
+}
+
+.seg-btn.active {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  user-select: none;
+}
+
+.check-row input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.radio-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(26, 23, 20, 0.35);
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.radio-dot::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: transparent;
+  transition: background 0.15s;
+}
+
+.check-row input:checked + .radio-dot::after {
+  background: var(--ink);
+}
+
+.teach-note {
+  margin: 0 0 12px;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--ink-faint);
+  max-width: 28ch;
+}
+
+.teach-note.subtle {
+  margin: 4px 0 0;
+  font-size: 0.68rem;
+  max-width: 26ch;
+}
+
+.teach-play {
+  display: block;
+  width: 100%;
+  margin-bottom: 14px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(26, 23, 20, 0.14);
+  background: rgba(26, 23, 20, 0.04);
+  font-size: 0.8rem;
+  color: var(--ink);
+  text-align: center;
+  transition: background 0.15s, border-color 0.15s;
+  touch-action: manipulation;
+}
+
+.teach-play:hover {
+  background: rgba(26, 23, 20, 0.07);
+  border-color: rgba(26, 23, 20, 0.22);
+}
+
+.teach-play:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.teach-speed-row {
+  margin-bottom: 0;
+}
+
+/* ════════════════════════════════════════════════════════
+   Responsive — desktop → iPad → iPhone
+   Principle: paper is the product. Everything else supports it.
+   ════════════════════════════════════════════════════════ */
+
+/* Large tablet / small laptop (still multi-column via min-width: 901) */
+@media (min-width: 901px) and (max-width: 1100px) {
+  :root {
+    --canvas: min(52vmin, 460px);
+    --kb-w: 220px;
+    --panel-w: 180px;
+  }
+
+  .workspace {
+    gap: 20px;
+  }
+
+  .app.is-writing {
+    --kb-w: 210px;
+    --panel-w: 160px;
+    --canvas: min(56vmin, 480px);
+  }
+}
+
+/* iPad portrait & small tablets — stack so paper stays large */
+@media (max-width: 900px) {
+  .app {
+    padding-top: max(16px, var(--safe-top));
+    padding-bottom: max(24px, var(--safe-bottom));
+    padding-inline: max(12px, var(--safe-left), var(--safe-right));
+  }
+
+  .title-block {
+    width: min(100%, 560px);
+    margin-bottom: 14px;
+    gap: 12px;
+  }
+
+  .practice-modes {
+    width: 100%;
+  }
+
+  .mode-btn {
+    min-height: var(--tap);
+    padding: 10px 12px;
+  }
+
+  .mode-sub {
+    display: none; /* save vertical space */
+  }
+
+  /* Paper nearly full width of the device (stacked layout is default) */
+  :root {
+    --canvas: min(86vw, 520px);
+  }
+
+  .app.is-writing {
+    --canvas: min(88vw, 540px);
+  }
+
+  .workspace {
+    width: 100%;
+    max-width: 640px;
+    gap: 20px;
+  }
+
+  .kb-rail,
+  .panel {
+    width: 100%;
+    max-width: none;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .app.is-writing .writing-rail.writing-only {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .canvas-col {
+    width: 100%;
+    align-items: center;
+  }
+
+  .canvas-wrap {
+    /* Slightly larger touch surface on tablet */
+    max-width: 100%;
+  }
+
+  .canvas-footer,
+  .hint {
+    width: min(100%, var(--canvas));
+  }
+
+  /* Alphabet strip: swipe sideways, don’t wrap into a tall block */
+  .alphabet-strip {
+    width: 100%;
+    max-width: 640px;
+    margin-bottom: 12px;
+    padding: 8px 10px;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+
+  .alphabet-strip::-webkit-scrollbar {
+    display: none;
+  }
+
+  .alphabet-btn {
+    min-width: var(--tap);
+    min-height: var(--tap);
+    flex-shrink: 0;
+    font-size: 1.25rem;
+  }
+
+  /* Forms: 2×2 still works; larger taps */
+  .form-card {
+    min-height: 72px;
+    min-height: max(72px, var(--tap) + 28px);
+  }
+
+  .form-card.form-card-chain {
+    min-height: var(--tap);
+  }
+
+  .practice-word-btn {
+    min-height: var(--tap);
+    padding: 8px 14px;
+  }
+
+  .pill {
+    min-height: var(--tap);
+    padding: 8px 14px;
+  }
+
+  .teach-play {
+    min-height: var(--tap);
+    padding: 12px 14px;
+    font-size: 0.9rem;
+  }
+
+  .slider-row {
+    min-height: var(--tap);
+    align-items: center;
+  }
+
+  .slider-row input[type="range"] {
+    min-height: 28px;
+  }
+
+  /* Writing tools panel: compact horizontal-friendly block */
+  .app.is-writing #writingTools.writing-only {
+    width: 100%;
+    max-width: var(--canvas);
+    margin-inline: auto;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(26, 23, 20, 0.08);
+    background: rgba(255, 253, 248, 0.75);
+  }
+
+  .app.is-writing .writing-rail.writing-only {
+    width: 100%;
+    max-width: var(--canvas);
+    margin-inline: auto;
+  }
+
+  .app.is-writing .canvas-footer {
+    opacity: 1;
+  }
+
+  /* Calligraphy keyboard: full width, easier thumbs */
+  .calligraphy-only .ar-keyboard-host,
+  .ar-keyboard-host {
+    width: 100%;
+  }
+
+  .ar-key {
+    min-height: var(--tap);
+    font-size: 1.05rem;
+  }
+
+  .ar-kb-chip,
+  .kb-toggle {
+    min-height: var(--tap);
+    padding: 8px 12px;
+  }
+
+  .seg-btn {
+    min-height: 40px;
+    padding: 8px 12px;
+  }
+
+  .styles .seg-btn {
+    min-height: var(--tap);
+  }
+
+  /* Horizontal style chips on tablet/phone */
+  #styleSeg.styles {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 8px;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  #styleSeg.styles::-webkit-scrollbar {
+    display: none;
+  }
+
+  #styleSeg .seg-btn {
+    flex-shrink: 0;
+  }
+}
+
+/* iPhone & small phones */
+@media (max-width: 520px) {
+  .title-ar {
+    font-size: 1.55rem;
+  }
+
+  .title-en {
+    font-size: 1.55rem;
+  }
+
+  .title-block {
+    margin-bottom: 10px;
+    gap: 10px;
+  }
+
+  .mode-btn {
+    padding: 10px 10px;
+  }
+
+  .mode-ar {
+    font-size: 1.05rem;
+  }
+
+  .mode-en {
+    font-size: 0.92rem;
+  }
+
+  :root {
+    /* Paper fills most of the phone width — this is where people write */
+    --canvas: min(92vw, 400px);
+  }
+
+  .app.is-writing {
+    --canvas: min(92vw, 400px);
+  }
+
+  .workspace {
+    gap: 16px;
+    max-width: 100%;
+  }
+
+  .letter-title-ar {
+    font-size: 1.35rem;
+  }
+
+  .forms-note {
+    font-size: 0.7rem;
+  }
+
+  .form-glyph {
+    font-size: 1.5rem;
+  }
+
+  .form-card {
+    min-height: 68px;
+    padding: 8px 4px;
+  }
+
+  .presets-label {
+    font-size: 0.72rem;
+  }
+
+  /* Tool bar sticks under the paper — always one thumb-reach away */
+  .canvas-footer {
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: sticky;
+    bottom: max(10px, var(--safe-bottom));
+    z-index: 20;
+    width: min(100%, var(--canvas));
+    max-width: 100%;
+    margin-inline: auto;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(26, 23, 20, 0.1);
+    background: rgba(247, 242, 232, 0.94);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 6px 24px rgba(40, 30, 15, 0.08);
+  }
+
+  .tool-seg {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .tool-btn {
+    flex: 1;
+    min-height: var(--tap);
+    font-size: 0.85rem;
+  }
+
+  .footer-actions {
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .footer-actions .pill {
+    flex: 1 1 calc(50% - 8px);
+    min-height: var(--tap);
+    text-align: center;
+    font-size: 0.8rem;
+  }
+
+  .stroke-count {
+    display: none; /* noise on phone */
+  }
+
+  /* Fatter pen size slider for thumbs */
+  input[type="range"] {
+    height: 28px;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Compact mode switcher */
+  .title-block {
+    margin-bottom: 8px;
+  }
+
+  .mode-btn {
+    padding: 8px 10px;
+  }
+
+  .mode-ar {
+    font-size: 1rem;
+  }
+
+  .hint {
+    font-size: 0.72rem;
+    text-align: center;
+  }
+
+  .panel-title {
+    font-size: 0.95rem;
+  }
+
+  .teach-note {
+    max-width: none;
+  }
+
+  /* Prevent double-tap zoom delays on controls */
+  .mode-btn,
+  .alphabet-btn,
+  .form-card,
+  .practice-word-btn,
+  .pill,
+  .teach-play,
+  .seg-btn,
+  .preset {
+    touch-action: manipulation;
+  }
+}
+
+/* Short landscape phones / landscape iPhone — keep paper usable */
+@media (max-height: 480px) and (orientation: landscape) {
+  .app {
+    padding-top: max(8px, var(--safe-top));
+    padding-bottom: max(12px, var(--safe-bottom));
+  }
+
+  .title-block {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 8px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .practice-modes {
+    width: min(100%, 360px);
+  }
+
+  .mode-sub {
+    display: none;
+  }
+
+  :root {
+    --canvas: min(52vh, 70vw, 320px);
+  }
+
+  .alphabet-strip {
+    margin-bottom: 8px;
+  }
+}
+
+/* Prefer larger paper when device has room and is touch-primary */
+@media (hover: none) and (pointer: coarse) {
+  .alphabet-btn,
+  .form-card,
+  .practice-word-btn,
+  .pill,
+  .seg-btn,
+  .preset {
+    /* Finger-friendly even if desktop media width is large (iPad Pro) */
+    min-height: max(40px, var(--tap) - 4px);
+  }
+
+  .canvas-wrap {
+    /* Apple Pencil / finger: no accidental page gestures */
+    touch-action: none;
+  }
+}
+
+/* iPad Pro landscape still gets a sensible three-column writing layout */
+@media (min-width: 901px) and (max-width: 1180px) and (hover: none) {
+  .app.is-writing {
+    --kb-w: 200px;
+    --panel-w: 160px;
+    --canvas: min(50vmin, 480px);
+  }
+}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Ink">
+  <rect width="128" height="128" rx="28" fill="#f3efe6"/>
+  <rect x="18" y="22" width="92" height="84" rx="10" fill="#f7f2e8" stroke="#1a1714" stroke-opacity="0.12" stroke-width="2"/>
+  <path d="M36 78c18-6 28-22 40-22 8 0 12 6 10 12-3 10-18 16-34 18" fill="none" stroke="#1a1714" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="88" cy="44" r="5" fill="#8b3a2a"/>
+  <text x="64" y="108" text-anchor="middle" font-family="Georgia, serif" font-size="14" fill="#1a1714" fill-opacity="0.45">حبر</text>
+</svg>
