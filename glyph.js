@@ -205,27 +205,36 @@ function drawLetterOnContext(ctx, layout) {
   ctx.restore();
 }
 
-function renderGlyphLayer(text, paperSize, guide = {}) {
+function renderGlyphLayer(text, paperSize, guide = {}, pixelRatio = 1) {
   const size = Math.round(paperSize);
   const layout = getLetterLayout(text, size, guide);
   if (!layout.text) return null;
+  const dpr = Math.max(1, pixelRatio || 1);
   const off = document.createElement("canvas");
-  off.width = size;
-  off.height = size;
+  off.width = Math.round(size * dpr);
+  off.height = Math.round(size * dpr);
   const ctx = off.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, size, size);
   drawLetterOnContext(ctx, layout);
-  return { layer: off, layout, size };
+  return { layer: off, layout, size, pixelRatio: dpr };
 }
 
 let _glyphCache = null;
 
-function getSharedGlyphLayer(text, paperSize, guide = {}, styleId = "") {
+function getSharedGlyphLayer(
+  text,
+  paperSize,
+  guide = {},
+  styleId = "",
+  pixelRatio = 1
+) {
   const size = Math.round(paperSize);
+  const dpr = Math.max(1, pixelRatio || 1);
   const userScale = guide.userScale != null ? guide.userScale : 1;
-  const key = `${text}|${size}|${styleId}|${guide.scale}|${userScale}|${guide.fontFamily}|${guide.fontWeight}|${guide.fontStyle}|${guide.letterSpacing}`;
+  const key = `${text}|${size}|${dpr}|${styleId}|${guide.scale}|${userScale}|${guide.fontFamily}|${guide.fontWeight}|${guide.fontStyle}|${guide.letterSpacing}`;
   if (_glyphCache && _glyphCache.key === key) return _glyphCache;
-  const rendered = renderGlyphLayer(text, size, guide);
+  const rendered = renderGlyphLayer(text, size, guide, dpr);
   if (!rendered) {
     _glyphCache = null;
     return null;
@@ -247,7 +256,13 @@ function getPaperBaseline() {
  * Writing direction for Arabic: right edge → left edge.
  */
 function analyzeGlyph(layer, paperSize) {
-  const c = layer.getContext("2d", { willReadFrequently: true });
+  // Analyze at logical size; the actual layer stays high-resolution for display.
+  const analysis = document.createElement("canvas");
+  analysis.width = paperSize;
+  analysis.height = paperSize;
+  const analysisCtx = analysis.getContext("2d", { willReadFrequently: true });
+  analysisCtx.drawImage(layer, 0, 0, paperSize, paperSize);
+  const c = analysisCtx;
   const { data, width, height } = c.getImageData(0, 0, paperSize, paperSize);
   const inkAt = (x, y) =>
     x >= 0 &&
@@ -310,7 +325,14 @@ async function animateShowMeGlyph(
 
   // Fresh glyph for this play (ignore cache if fonts just loaded)
   if (typeof clearGlyphCache === "function") clearGlyphCache();
-  const shared = getSharedGlyphLayer(text, size, guide || {}, styleId || "");
+  const dpr = Math.max(1, inkCanvas.width / size || 1);
+  const shared = getSharedGlyphLayer(
+    text,
+    size,
+    guide || {},
+    styleId || "",
+    dpr
+  );
   if (!shared?.layer) return;
 
   const { layer } = shared;
