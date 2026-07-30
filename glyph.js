@@ -345,13 +345,12 @@ async function animateShowMeGlyph(
     const dpr0 = Math.max(1, inkCanvas.width / size);
     ctx0.setTransform(dpr0, 0, 0, dpr0, 0, 0);
     ctx0.clearRect(0, 0, size, size);
-    ctx0.drawImage(layer, 0, 0);
+    ctx0.drawImage(layer, 0, 0, size, size);
     return;
   }
 
   const span = Math.max(1, maxX - minX);
   const ctx = inkCanvas.getContext("2d");
-  const dpr = Math.max(0.5, inkCanvas.width / size || 1);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
   const speed = Math.max(0.25, Math.min(2.5, playSpeed || 1));
@@ -369,7 +368,7 @@ async function animateShowMeGlyph(
       if (done) return;
       done = true;
       ctx.clearRect(0, 0, size, size);
-      ctx.drawImage(layer, 0, 0);
+      ctx.drawImage(layer, 0, 0, size, size);
       resolve();
     };
 
@@ -390,7 +389,7 @@ async function animateShowMeGlyph(
       const revealLeft = Math.max(0, frontierX - softEdge * 0.25);
       ctx.rect(revealLeft, 0, size - revealLeft + 1, size);
       ctx.clip();
-      ctx.drawImage(layer, 0, 0);
+      ctx.drawImage(layer, 0, 0, size, size);
       ctx.restore();
 
       // Soft pen tip at the writing edge
