@@ -880,6 +880,11 @@ select {
   gap: 2px;
 }
 
+/* Size controls already live in the side panel on larger screens. */
+#adjustSizeBtn {
+  display: none;
+}
+
 .tool-btn {
   min-height: 36px;
   padding: 6px 14px;
@@ -2044,6 +2049,12 @@ div.seg[aria-label="surface"] {
     flex: 1;
     min-height: var(--tap);
     font-size: 0.85rem;
+  }
+
+  #adjustSizeBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .footer-actions {
