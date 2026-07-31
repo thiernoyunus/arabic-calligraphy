@@ -808,7 +808,7 @@ select {
   }
 
   #ink.is-erasing {
-    cursor: cell;
+    cursor: none;
   }
 
   .qalam-cursor {
@@ -826,6 +826,11 @@ select {
 
   .qalam-cursor.visible {
     opacity: 1;
+  }
+
+  .qalam-cursor.is-erasing {
+    background-image: url("assets/eraser-cursor.png");
+    transform: translate(-18px, -18px);
   }
 }
 

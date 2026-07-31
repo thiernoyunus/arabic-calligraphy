@@ -74,6 +74,12 @@
   function setPenSize(n) {
     const v = Math.max(0, Math.min(1, Number(n) || 0.5));
     brush.setParams({ weight: v });
+    if (qalamCursor?.classList.contains("is-erasing")) {
+      const eraserSize = 20 + v * 40;
+      qalamCursor.style.width = `${eraserSize}px`;
+      qalamCursor.style.height = `${eraserSize}px`;
+      qalamCursor.style.transform = `translate(${-eraserSize / 2}px, ${-eraserSize / 2}px)`;
+    }
     const main = document.getElementById("weight");
     const mainVal = document.getElementById("weightVal");
     const ww = document.getElementById("writingWeight");
@@ -308,11 +314,23 @@
     feedPointer(e, "move");
   }
 
-  function moveQalamCursor(e) {
-    if (!qalamCursor || e.pointerType !== "mouse" || brush.getTool() !== "ink") return;
+  function moveToolCursor(e) {
+    if (!qalamCursor || e.pointerType !== "mouse") return;
+    const erasing = brush.getTool() === "erase";
     const rect = inkCanvas.getBoundingClientRect();
     qalamCursor.style.left = `${e.clientX - rect.left}px`;
     qalamCursor.style.top = `${e.clientY - rect.top}px`;
+    qalamCursor.classList.toggle("is-erasing", erasing);
+    if (erasing) {
+      const eraserSize = 20 + brush.params.weight * 40;
+      qalamCursor.style.width = `${eraserSize}px`;
+      qalamCursor.style.height = `${eraserSize}px`;
+      qalamCursor.style.transform = `translate(${-eraserSize / 2}px, ${-eraserSize / 2}px)`;
+    } else {
+      qalamCursor.style.width = "36px";
+      qalamCursor.style.height = "36px";
+      qalamCursor.style.transform = "translate(-9px, -30px)";
+    }
     qalamCursor.classList.add("visible");
     inkCanvas.style.cursor = "none";
   }
@@ -326,8 +344,8 @@
 
   inkCanvas.addEventListener("pointerdown", onDown);
   inkCanvas.addEventListener("pointermove", onMove);
-  inkCanvas.addEventListener("pointerenter", moveQalamCursor);
-  inkCanvas.addEventListener("pointermove", moveQalamCursor);
+  inkCanvas.addEventListener("pointerenter", moveToolCursor);
+  inkCanvas.addEventListener("pointermove", moveToolCursor);
   inkCanvas.addEventListener("pointerup", onUp);
   inkCanvas.addEventListener("pointercancel", onUp);
   inkCanvas.addEventListener("pointerleave", (e) => {
