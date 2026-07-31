@@ -30,3 +30,10 @@ test("ba has fresh random words at the start, middle, and end", () => {
   assert.ok(words.some((word) => word.endsWith("ب")));
   assert.ok(words.some((word) => word.indexOf("ب") > 0 && !word.endsWith("ب")));
 });
+
+
+test("hamza is available for alphabet practice", () => {
+  assert.ok(context.words["ء"]?.length);
+  const chosen = context.pick("ء", context.words["ء"][0]);
+  assert.ok(chosen.includes("ء"));
+});
