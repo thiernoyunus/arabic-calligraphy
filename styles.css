@@ -797,10 +797,35 @@ select {
   cursor: cell;
 }
 
+.qalam-cursor {
+  display: none;
+}
+
 /* Desktop qalam: the click point sits on the cut reed nib. */
 @media (hover: hover) and (pointer: fine) {
   #ink {
-    cursor: url("assets/qalam-cursor.png") 9 30, crosshair;
+    cursor: none;
+  }
+
+  #ink.is-erasing {
+    cursor: cell;
+  }
+
+  .qalam-cursor {
+    position: absolute;
+    z-index: 4;
+    display: block;
+    width: 36px;
+    height: 36px;
+    background: url("assets/qalam-cursor.png") center / contain no-repeat;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-9px, -30px);
+    transition: opacity 0.08s;
+  }
+
+  .qalam-cursor.visible {
+    opacity: 1;
   }
 }
 

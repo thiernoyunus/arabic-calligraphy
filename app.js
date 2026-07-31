@@ -3,6 +3,7 @@
   const ghostCanvas = document.getElementById("ghost");
   const inkCanvas = document.getElementById("ink");
   const canvasWrap = document.getElementById("canvasWrap");
+  const qalamCursor = document.getElementById("qalamCursor");
   const strokeNumbers = document.getElementById("strokeNumbers");
   const charBadge = document.getElementById("charBadge");
   const strokeCountEl = document.getElementById("strokeCount");
@@ -162,6 +163,8 @@
   function setTool(tool) {
     const t = tool === "erase" ? "erase" : "ink";
     brush.setTool(t);
+    qalamCursor?.classList.remove("visible");
+    inkCanvas.style.cursor = "";
     document.querySelectorAll("[data-tool]").forEach((btn) => {
       const on = btn.dataset.tool === t;
       btn.classList.toggle("active", on);
@@ -305,6 +308,15 @@
     feedPointer(e, "move");
   }
 
+  function moveQalamCursor(e) {
+    if (!qalamCursor || e.pointerType !== "mouse" || brush.getTool() !== "ink") return;
+    const rect = inkCanvas.getBoundingClientRect();
+    qalamCursor.style.left = `${e.clientX - rect.left}px`;
+    qalamCursor.style.top = `${e.clientY - rect.top}px`;
+    qalamCursor.classList.add("visible");
+    inkCanvas.style.cursor = "none";
+  }
+
   function onUp(e) {
     if (!brush.drawing) return;
     e.preventDefault();
@@ -314,9 +326,13 @@
 
   inkCanvas.addEventListener("pointerdown", onDown);
   inkCanvas.addEventListener("pointermove", onMove);
+  inkCanvas.addEventListener("pointerenter", moveQalamCursor);
+  inkCanvas.addEventListener("pointermove", moveQalamCursor);
   inkCanvas.addEventListener("pointerup", onUp);
   inkCanvas.addEventListener("pointercancel", onUp);
   inkCanvas.addEventListener("pointerleave", (e) => {
+    qalamCursor?.classList.remove("visible");
+    inkCanvas.style.cursor = "";
     if (brush.drawing && e.pointerType === "mouse") onUp(e);
   });
   inkCanvas.addEventListener(
