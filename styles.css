@@ -491,11 +491,12 @@ select {
 .workspace {
   width: min(100%, 1180px);
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
   align-items: start;
   justify-items: stretch;
   direction: ltr;
+  min-width: 0;
 }
 
 /* Paper first on narrow screens; forms before secondary pen-size panel */

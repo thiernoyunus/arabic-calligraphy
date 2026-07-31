@@ -846,7 +846,7 @@
     gctx.clearRect(0, 0, size + 2, size + 2);
 
     if (visible && ch && typeof getSharedGlyphLayer === "function") {
-      const shared = getSharedGlyphLayer(ch, size, g, profile.id);
+      const shared = getSharedGlyphLayer(ch, size, g, profile.id, dpr);
       if (shared?.layer) {
         // Writing: slightly stronger ghost so tracing is easy (workbook feel)
         const base =
