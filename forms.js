@@ -167,15 +167,27 @@ const PRACTICE_WORDS = {
   ي: ["يد", "بيت", "كتاب"],
 };
 
+const EXTRA_RANDOM_PRACTICE_WORDS = {
+  ث: ["أثاث", "مثلث", "حثيث"],
+  ض: ["ضفدع", "حوض", "مضيء"],
+  ظ: ["ظرف", "محظوظ", "حفظ"],
+};
+
 function getPracticeWords(char) {
   const c = [...(char || "").trim()][0];
   return PRACTICE_WORDS[c] || [];
 }
 
-/** Pick a different practice word that includes the letter being studied. */
+/** Pick a different word that includes the letter being studied. */
 function randomAlphabetPracticeWord(char, avoid) {
   const c = [...(char || "").trim()][0];
-  const words = getPracticeWords(c).filter((word) => word.includes(c));
+  const visibleWords = getPracticeWords(c);
+  const library =
+    typeof PRACTICE_POOL !== "undefined" ? PRACTICE_POOL : [];
+  const words = [...library, ...(EXTRA_RANDOM_PRACTICE_WORDS[c] || [])].filter(
+    (word) =>
+      word.includes(c) && !word.includes(" ") && !visibleWords.includes(word)
+  );
   const choices = words.filter((word) => word !== avoid);
   const pool = choices.length ? choices : words;
   return pool[Math.floor(Math.random() * pool.length)] || "";
