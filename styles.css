@@ -797,6 +797,13 @@ select {
   cursor: cell;
 }
 
+/* Desktop qalam: the click point sits on the cut reed nib. */
+@media (hover: hover) and (pointer: fine) {
+  #ink {
+    cursor: url("assets/qalam-cursor.png") 9 30, crosshair;
+  }
+}
+
 .visually-hidden {
   position: absolute !important;
   width: 1px !important;
