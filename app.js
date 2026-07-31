@@ -61,6 +61,7 @@
       showKeyboard: "Show keyboard",
       typeArabic: "Type Arabic",
       randomWord: "Random word",
+      randomAlphabetWord: "Random practice word",
       pen: "Pen",
       eraser: "Eraser",
       undo: "Undo",
@@ -90,6 +91,7 @@
       showKeyboard: "إظهار لوحة المفاتيح",
       typeArabic: "اكتب بالعربية",
       randomWord: "كلمة عشوائية",
+      randomAlphabetWord: "كلمة تدريب عشوائية",
       pen: "قلم",
       eraser: "ممحاة",
       undo: "تراجع",
@@ -162,6 +164,7 @@
     setUiText("undoBtn", "undo");
     setUiText("clearBtn", "clear");
     setUiText("randomWordBtn", "randomWord");
+    setUiText("randomAlphabetWordBtn", "randomAlphabetWord");
     if (typeInput) typeInput.placeholder = t("typeArabic");
     if (kbToggle) {
       kbToggle.textContent = t(state.kbOpen ? "hideKeyboard" : "showKeyboard");
@@ -1155,6 +1158,17 @@
   const randomWordBtn = document.getElementById("randomWordBtn");
   if (randomWordBtn) {
     randomWordBtn.addEventListener("click", applyRandomWord);
+  }
+
+  const randomAlphabetWordBtn = document.getElementById("randomAlphabetWordBtn");
+  if (randomAlphabetWordBtn) {
+    randomAlphabetWordBtn.addEventListener("click", () => {
+      const word =
+        typeof randomAlphabetPracticeWord === "function"
+          ? randomAlphabetPracticeWord(state.alphabetChar, state.wordPractice)
+          : "";
+      if (word) applyPracticeWord(word);
+    });
   }
 
   function syncFromInput(commit) {
