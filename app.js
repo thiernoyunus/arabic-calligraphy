@@ -776,9 +776,10 @@
   }
 
   function scrollFormsIntoView() {
-    document
-      .getElementById("writingRail")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const target =
+      document.getElementById("quickFormStrip") ||
+      document.getElementById("writingRail");
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function refreshWritingHint() {
