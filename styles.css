@@ -655,6 +655,14 @@ select {
   min-width: 0;
 }
 
+.calligraphy-style-strip {
+  width: min(100%, 640px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 auto 12px;
+}
+
 /* Paper first on narrow screens; forms before secondary pen-size panel */
 .canvas-col { order: 1; }
 .kb-rail { order: 2; }   /* Writing forms / Calligraphy keyboard next */
@@ -705,6 +713,10 @@ select {
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
+}
+
+.canvas-scroll-gutter {
+  display: none;
 }
 
 #paper,
@@ -991,8 +1003,7 @@ select {
   min-height: 30px;
 }
 
-.kb-rail.is-collapsed .keyboard-block,
-.kb-rail.is-collapsed .presets-block {
+.kb-rail.is-collapsed .keyboard-block {
   display: none;
 }
 
@@ -1524,6 +1535,29 @@ input[type="range"]::-moz-range-thumb {
   .canvas-wrap {
     /* Slightly larger touch surface on tablet */
     max-width: 100%;
+    touch-action: pan-y;
+  }
+
+  #ink {
+    touch-action: none;
+  }
+
+  .canvas-scroll-gutter {
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    z-index: 4;
+    touch-action: pan-y;
+  }
+
+  .canvas-scroll-gutter-left {
+    left: 0;
+  }
+
+  .canvas-scroll-gutter-right {
+    right: 0;
   }
 
   .canvas-footer,

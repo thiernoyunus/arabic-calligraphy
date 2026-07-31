@@ -102,6 +102,12 @@
 
     <!-- Writing: letter picker -->
     <div class="alphabet-strip writing-only" id="alphabetStrip" aria-label="Arabic alphabet"></div>
+    <div class="calligraphy-style-strip calligraphy-only" aria-label="Calligraphy styles">
+      <span class="presets-label ui-en">Style</span>
+      <span class="presets-label ui-ar">نوع الخط</span>
+      <div class="seg wrap styles" id="styleSeg" role="group" aria-label="style"></div>
+      <button type="button" class="random-word-btn" id="randomWordBtn">Random word</button>
+    </div>
 
     <main class="workspace">
       <aside class="kb-rail" id="kbDock" aria-label="Practice tools">
@@ -137,8 +143,8 @@
               <strong class="ui-ar">لوحة</strong>
               <span class="ui-en">Arabic keyboard</span>
             </div>
-            <button type="button" class="pill kb-toggle" id="kbToggle" aria-expanded="true">
-              Hide keyboard
+            <button type="button" class="pill kb-toggle" id="kbToggle" aria-expanded="false">
+              Show keyboard
             </button>
           </div>
 
@@ -158,9 +164,6 @@
 
           <div class="presets-block" id="presetsBlock">
             <div class="presets-label" data-i18n="words">Practice words</div>
-            <button type="button" class="random-word-btn" id="randomWordBtn">
-              Random word
-            </button>
             <div class="presets" id="presets"></div>
           </div>
 
@@ -176,6 +179,8 @@
           <canvas id="paper" aria-label="Practice paper"></canvas>
           <canvas id="ghost" aria-label="Letter guide to trace"></canvas>
           <canvas id="ink" aria-label="Ink drawing"></canvas>
+          <div class="canvas-scroll-gutter canvas-scroll-gutter-left" aria-hidden="true"></div>
+          <div class="canvas-scroll-gutter canvas-scroll-gutter-right" aria-hidden="true"></div>
           <div class="qalam-cursor" id="qalamCursor" aria-hidden="true"></div>
           <div class="stroke-numbers" id="strokeNumbers"></div>
           <div class="char-badge" id="charBadge"></div>
@@ -190,11 +195,9 @@
             <button type="button" class="tool-btn" id="eraseToolBtn" data-tool="erase" aria-pressed="false">
               Eraser
             </button>
+            <button type="button" class="tool-btn" id="adjustSizeBtn">Adjust sizes</button>
           </div>
           <div class="footer-actions">
-            <button type="button" class="pill" id="undoBtn" title="Remove last stroke">
-              Undo
-            </button>
             <button type="button" class="pill" id="clearBtn" title="Clear the whole paper">
               Clear page
             </button>
@@ -242,15 +245,7 @@
         </section>
 
         <div class="calligraphy-only">
-          <section class="panel-block">
-            <h2 class="panel-title"><span class="glyph ui-ar">قلم</span><span class="ui-en">Style</span></h2>
-            <p class="teach-note subtle" id="styleHint">
-              Pick a real script family. Naskh is the clear everyday hand.
-            </p>
-            <div class="seg wrap styles" id="styleSeg" role="group" aria-label="style"></div>
-          </section>
-
-          <section class="panel-block">
+          <section class="panel-block" id="penSettings">
             <h2 class="panel-title"><span class="glyph ui-ar">حبر</span><span class="ui-en">Pen</span></h2>
             <label class="slider-row">
               <span class="slider-label" data-i18n="penSize">Pen size</span>

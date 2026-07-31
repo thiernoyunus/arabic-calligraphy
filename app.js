@@ -33,16 +33,16 @@
     showMeasures: true,
     /** base letter for writing mode (e.g. ب) */
     alphabetChar: "ب",
-    /** isolated | initial | medial | final | chain — Connect first (Iqra-style) */
-    formId: "chain",
+    /** isolated | initial | medial | final | chain */
+    formId: "isolated",
     /** form | chain | word */
-    drillKind: "chain",
+    drillKind: "form",
     /** practice word string when drillKind === 'word' */
     wordPractice: null,
     /** Model text size on paper (1 = default; long phrases still auto-fit) */
     textSize: 1,
-    current: findLetter("ببب"),
-    kbOpen: true,
+    current: findLetter("ب"),
+    kbOpen: false,
     hasWatched: false,
     uiLanguage: (() => {
       try {
@@ -62,6 +62,7 @@
       typeArabic: "Type Arabic",
       randomWord: "Random word",
       randomAlphabetWord: "Random practice word",
+      adjustSizes: "Adjust sizes",
       pen: "Pen",
       eraser: "Eraser",
       undo: "Undo",
@@ -92,6 +93,7 @@
       typeArabic: "اكتب بالعربية",
       randomWord: "كلمة عشوائية",
       randomAlphabetWord: "كلمة تدريب عشوائية",
+      adjustSizes: "تعديل الأحجام",
       pen: "قلم",
       eraser: "ممحاة",
       undo: "تراجع",
@@ -161,10 +163,10 @@
     });
     setUiText("penToolBtn", "pen");
     setUiText("eraseToolBtn", "eraser");
-    setUiText("undoBtn", "undo");
     setUiText("clearBtn", "clear");
     setUiText("randomWordBtn", "randomWord");
     setUiText("randomAlphabetWordBtn", "randomAlphabetWord");
+    setUiText("adjustSizeBtn", "adjustSizes");
     if (typeInput) typeInput.placeholder = t("typeArabic");
     if (kbToggle) {
       kbToggle.textContent = t(state.kbOpen ? "hideKeyboard" : "showKeyboard");
@@ -301,17 +303,11 @@
     });
   }
 
-  function doUndo() {
-    brush.undo();
-    updateCount();
-  }
-
   function doClear() {
     brush.clear();
     updateCount();
   }
 
-  document.getElementById("undoBtn")?.addEventListener("click", doUndo);
   document.getElementById("clearBtn")?.addEventListener("click", doClear);
 
   // Pen / Eraser — erase scrubs only the part you touch (not the whole paper)
@@ -332,6 +328,12 @@
   }
   document.querySelectorAll("[data-tool]").forEach((btn) => {
     btn.addEventListener("click", () => setTool(btn.dataset.tool));
+  });
+  document.getElementById("adjustSizeBtn")?.addEventListener("click", () => {
+    const target = document.getElementById(
+      state.practice === "writing" ? "writingTools" : "penSettings"
+    );
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
   setTool("ink");
 
@@ -519,15 +521,6 @@
     { passive: false }
   );
 
-  // keyboard undo
-  window.addEventListener("keydown", (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === "z") {
-      e.preventDefault();
-      brush.undo();
-      updateCount();
-    }
-  });
-
   // ── styles (qalam profiles) ───────────────────────────
   function shortArabicLabel(profile) {
     // Compact button labels; full names live in title tooltips
@@ -648,7 +641,7 @@
         );
       paper.setGridKind("baseline");
       paper.draw(cssSize());
-      applyAlphabetForm(state.alphabetChar, state.formId || "chain");
+      applyAlphabetForm(state.alphabetChar, state.formId || "isolated");
       buildAlphabet();
       buildForms();
       buildPracticeWords();
@@ -734,17 +727,12 @@
       btn.textContent = entry.char;
       btn.title = state.uiLanguage === "ar" ? entry.nameAr : entry.name;
       btn.addEventListener("click", () => {
-        // New letter: Connect first if it joins (workbook pattern), else Alone
-        const pack =
-          typeof getLetterForms === "function"
-            ? getLetterForms(entry.char)
-            : { connectsLeft: true };
-        const nextForm = pack.connectsLeft ? "chain" : "isolated";
-        applyAlphabetForm(entry.char, nextForm);
+        applyAlphabetForm(entry.char, "isolated", false);
         buildAlphabet();
         buildForms();
         buildPracticeWords();
         updateLetterTitle();
+        requestAnimationFrame(scrollFormsIntoView);
       });
       host.appendChild(btn);
     }
@@ -785,6 +773,12 @@
         /* ignore */
       }
     }, 320);
+  }
+
+  function scrollFormsIntoView() {
+    document
+      .getElementById("writingRail")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function refreshWritingHint() {
@@ -839,7 +833,7 @@
         : `Practice ${entry.name}. ${meta.labelEn}: ${meta.hint}. Watch the stroke order, then trace the light outline.${joinNote}${chainNote}`;
   }
 
-  function applyAlphabetForm(char, formId) {
+  function applyAlphabetForm(char, formId, scrollToPaper = true) {
     state.alphabetChar = char;
     state.formId = formId || "isolated";
     state.wordPractice = null;
@@ -877,8 +871,7 @@
     // Tip for writing mode (set after setLetter so it isn’t overwritten)
     refreshWritingHint();
 
-    // Mobile: jump back to the paper so they can draw immediately
-    requestAnimationFrame(scrollPaperIntoView);
+    if (scrollToPaper) requestAnimationFrame(scrollPaperIntoView);
   }
 
   function applyPracticeWord(word) {
@@ -1224,17 +1217,17 @@
     });
   }
 
+  function syncKeyboardVisibility() {
+    if (!kbToggle || !kbDock) return;
+    kbDock.classList.toggle("is-collapsed", !state.kbOpen);
+    kbToggle.setAttribute("aria-expanded", state.kbOpen ? "true" : "false");
+    kbToggle.textContent = t(state.kbOpen ? "hideKeyboard" : "showKeyboard");
+  }
+
   if (kbToggle && kbDock) {
     kbToggle.addEventListener("click", () => {
       state.kbOpen = !state.kbOpen;
-      kbDock.classList.toggle("is-collapsed", !state.kbOpen);
-      kbToggle.setAttribute("aria-expanded", state.kbOpen ? "true" : "false");
-      kbToggle.textContent = t(state.kbOpen ? "hideKeyboard" : "showKeyboard");
-      // When keyboard rail is collapsed, give the paper more room
-      document.documentElement.style.setProperty(
-        "--kb-w",
-        state.kbOpen ? "" : "100px"
-      );
+      syncKeyboardVisibility();
     });
   }
 
@@ -1298,6 +1291,7 @@
   // Default path: Writing (alphabet) — most learners need this first
   setPractice("writing");
   setGhost(true); // guide on by default in every mode
+  syncKeyboardVisibility();
   document.querySelectorAll("[data-ui-language-choice]").forEach((btn) => {
     btn.addEventListener("click", () => setUiLanguage(btn.dataset.uiLanguageChoice));
   });
