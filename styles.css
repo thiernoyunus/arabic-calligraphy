@@ -88,6 +88,46 @@ select {
   width: min(100%, 520px);
 }
 
+.language-switch {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.72);
+}
+
+.lang-btn {
+  min-height: 30px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+}
+
+.lang-btn.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.app[data-ui-language="en"] .ui-ar,
+.app[data-ui-language="en"] .letter-title-ar,
+.app[data-ui-language="en"] .form-label-ar,
+.app[data-ui-language="ar"] .ui-en {
+  display: none !important;
+}
+
+.app[data-ui-language="ar"] .letter-title-en,
+.app[data-ui-language="ar"] .form-label-en {
+  display: none !important;
+}
+
+.app[data-ui-language="ar"] .mode-btn,
+.app[data-ui-language="ar"] .panel,
+.app[data-ui-language="ar"] .kb-rail,
+.app[data-ui-language="ar"] .canvas-footer {
+  font-family: "IBM Plex Sans Arabic", sans-serif;
+}
+
 .header-actions {
   align-self: flex-end;
   display: flex;
