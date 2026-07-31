@@ -634,24 +634,6 @@ class PaperSurface {
       ctx.stroke();
     }
     ctx.setLineDash([]);
-
-    // Extra measures (calligraphy): nuqṭa ladder + pen angle
-    // Writing worksheets stay calmer — baseline lines only
-    if (this.showMeasures) {
-      const ladderX = m + boxW - 14;
-      for (let i = 0; i <= alifDots; i++) {
-        const y = baseline - nuqta * i;
-        this._drawNuqta(ladderX, y, Math.max(2.2, nuqta * 0.28), 0.28);
-      }
-      ctx.strokeStyle = "rgba(139, 58, 42, 0.15)";
-      ctx.beginPath();
-      ctx.moveTo(ladderX, alifTop);
-      ctx.lineTo(ladderX, baseline);
-      ctx.stroke();
-
-      const ang = this.penAngleDeg || 35;
-      this._drawPenAngleHint(m + 22, baseline + nuqta * 3.4, ang, 0.28);
-    }
   }
 
   /**
@@ -760,9 +742,6 @@ class PaperSurface {
     ctx.moveTo(m + boxW, m + boxH * 0.15);
     ctx.lineTo(m + boxW, m + boxH * 0.9);
     ctx.stroke();
-
-    const ang = this.penAngleDeg || 55;
-    this._drawPenAngleHint(m + 22, m + boxH * 0.82, ang, 0.28);
   }
 
   /** Classical nuqṭa = diamond from the pen tip */
