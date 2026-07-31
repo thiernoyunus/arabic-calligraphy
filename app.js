@@ -9,8 +9,6 @@
   const strokeCountEl = document.getElementById("strokeCount");
   const typeInput = document.getElementById("typeInput");
   const presetsEl = document.getElementById("presets");
-  const hint = document.getElementById("hint");
-  const hintText = document.getElementById("hintText");
   const showMeBtn = document.getElementById("showMeBtn");
   const styleSeg = document.getElementById("styleSeg");
   const kbHost = document.getElementById("arabicKeyboard");
@@ -180,8 +178,7 @@
     buildAlphabet();
     buildForms();
     buildPracticeWords();
-    if (state.practice === "writing") refreshWritingHint();
-    else {
+    if (state.practice !== "writing") {
       const styleHint = document.getElementById("styleHint");
       if (styleHint) {
         styleHint.textContent =
@@ -411,10 +408,6 @@
       updateCount();
       state.hasWatched = true;
       setGhost(true);
-      if (hint && hintText) {
-        hint.hidden = false;
-        hintText.textContent = t("yourTurn");
-      }
     } catch (err) {
       console.warn("Show me failed:", err);
     } finally {
@@ -594,18 +587,6 @@
     return (state.current?.char || (typeInput && typeInput.value) || "").trim();
   }
 
-  function updateLetterTitle() {
-    const arEl = document.getElementById("letterTitleAr");
-    const enEl = document.getElementById("letterTitleEn");
-    if (!arEl && !enEl) return;
-    const entry =
-      typeof getAlphabetEntry === "function"
-        ? getAlphabetEntry(state.alphabetChar)
-        : null;
-    if (arEl) arEl.textContent = entry ? entry.nameAr : state.alphabetChar;
-    if (enEl) enEl.textContent = entry ? entry.name : "";
-  }
-
   // ── Practice path: Writing vs Calligraphy ─────────────
   function setPractice(practice) {
     state.practice = practice === "calligraphy" ? "calligraphy" : "writing";
@@ -647,7 +628,6 @@
       buildAlphabet();
       buildForms();
       buildPracticeWords();
-      updateLetterTitle();
     } else {
       // Calligraphy: styles + keyboard + words (guide stays on by default)
       setGhost(true);
@@ -733,7 +713,6 @@
         buildAlphabet();
         buildForms();
         buildPracticeWords();
-        updateLetterTitle();
         requestAnimationFrame(scrollFormsIntoView);
       });
       host.appendChild(btn);
@@ -784,58 +763,6 @@
     target?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  function refreshWritingHint() {
-    if (!hint || !hintText) return;
-    const entry =
-      typeof getAlphabetEntry === "function"
-        ? getAlphabetEntry(state.alphabetChar)
-        : null;
-    if (!entry) return;
-
-    if (state.drillKind === "word" && state.wordPractice) {
-      const name =
-        state.uiLanguage === "ar" ? entry.nameAr : entry.name;
-      hint.hidden = false;
-      hintText.textContent =
-        state.uiLanguage === "ar"
-          ? `${name} · تدرّب على كلمة «${state.wordPractice}». شاهد ترتيب الخطوات ثم تتبع النموذج الفاتح.`
-          : `${name} · Practice the word «${state.wordPractice}». Watch the stroke order, then trace the light outline.`;
-      return;
-    }
-
-    const pack =
-      typeof getLetterForms === "function"
-        ? getLetterForms(state.alphabetChar)
-        : { connectsLeft: true };
-    const meta =
-      state.formId === "chain"
-        ? typeof CHAIN_META !== "undefined"
-          ? CHAIN_META
-          : null
-        : typeof FORM_META !== "undefined"
-          ? FORM_META.find((form) => form.id === state.formId)
-          : null;
-    if (!meta) return;
-
-    const joinNote =
-      !pack.connectsLeft && state.formId !== "chain"
-        ? state.uiLanguage === "ar"
-          ? " لا يتصل هذا الحرف بما بعده، لذلك يشبه الأول والوسط المنفصل."
-          : " This letter does not connect to the next one, so Start and Middle look like Alone."
-        : "";
-    const chainNote =
-      state.formId === "chain"
-        ? state.uiLanguage === "ar"
-          ? " راقب اتصال الحرف من الأول إلى الوسط ثم الأخير."
-          : " Watch how the letter joins from start to middle to end."
-        : "";
-    hint.hidden = false;
-    hintText.textContent =
-      state.uiLanguage === "ar"
-        ? `تدرّب على ${entry.nameAr}. ابدأ بشكل ${meta.labelAr}. شاهد ترتيب الخطوات ثم تتبع النموذج الفاتح.${joinNote}${chainNote}`
-        : `Practice ${entry.name}. ${meta.labelEn}: ${meta.hint}. Watch the stroke order, then trace the light outline.${joinNote}${chainNote}`;
-  }
-
   function applyAlphabetForm(char, formId, scrollToPaper = true) {
     state.alphabetChar = char;
     state.formId = formId || "isolated";
@@ -869,10 +796,6 @@
     brush.clear();
     updateCount();
     setGhost(true);
-    updateLetterTitle();
-
-    // Tip for writing mode (set after setLetter so it isn’t overwritten)
-    refreshWritingHint();
 
     if (scrollToPaper) requestAnimationFrame(scrollPaperIntoView);
   }
@@ -892,15 +815,12 @@
     buildForms();
     buildPracticeWords();
 
-    refreshWritingHint();
-
     requestAnimationFrame(scrollPaperIntoView);
   }
 
   function buildForms() {
     const host = document.getElementById("formsGrid");
     const quickHost = document.getElementById("quickFormStrip");
-    const note = document.getElementById("formsNote");
     if (!host || typeof getLetterForms === "undefined") return;
 
     const pack = getLetterForms(state.alphabetChar);
@@ -1007,27 +927,6 @@
       quickChain.addEventListener("click", () => selectForm("chain"));
       quickHost.appendChild(quickChain);
     }
-
-    if (note) {
-      const entry =
-        typeof getAlphabetEntry === "function"
-          ? getAlphabetEntry(state.alphabetChar)
-          : null;
-      const name = entry
-        ? `${entry.nameAr} · ${entry.name}`
-        : state.alphabetChar;
-      note.textContent = pack.connectsLeft
-        ? state.uiLanguage === "ar"
-          ? "اختر منفصل أو أول أو وسط أو آخر أو وصل لرؤية اتصال الحروف."
-          : "Choose a letter form, then watch the stroke order and trace it."
-        : state.uiLanguage === "ar"
-          ? "هذا الحرف لا يتصل بالحرف الذي بعده. تدرّب على المنفصل أو الأخير."
-          : "This letter does not join to the next letter. Practice Alone or End.";
-      // Keep name visible in letter title; note stays instructional
-      if (entry) {
-        note.setAttribute("data-letter", name);
-      }
-    }
   }
 
   function buildPracticeWords() {
@@ -1126,13 +1025,7 @@
   }
 
   function updateHint() {
-    if (state.practice === "writing") return; // writing sets its own tips
-    if (state.current?.tip) {
-      hint.hidden = false;
-      hintText.textContent = state.current.tip + " · ";
-    } else {
-      hint.hidden = true;
-    }
+    // Practice tips were removed — the paper and controls already show the next step.
   }
 
   function updateCount() {
@@ -1179,10 +1072,6 @@
     brush.clear();
     updateCount();
     setGhost(true);
-    if (hint && hintText) {
-      hint.hidden = false;
-      hintText.textContent = t("randomHint", { word });
-    }
   }
 
   const randomWordBtn = document.getElementById("randomWordBtn");
