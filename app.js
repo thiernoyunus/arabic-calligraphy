@@ -166,6 +166,8 @@
     setUiText("clearBtn", "clear");
     setUiText("randomWordBtn", "randomWord");
     setUiText("randomAlphabetWordBtn", "randomAlphabetWord");
+    setUiText("dockRandomWordBtn", "randomWord");
+    setUiText("dockRandomAlphabetWordBtn", "randomAlphabetWord");
     setUiText("adjustSizeBtn", "adjustSizes");
     if (typeInput) typeInput.placeholder = t("typeArabic");
     if (kbToggle) {
@@ -897,6 +899,7 @@
 
   function buildForms() {
     const host = document.getElementById("formsGrid");
+    const quickHost = document.getElementById("quickFormStrip");
     const note = document.getElementById("formsNote");
     if (!host || typeof getLetterForms === "undefined") return;
 
@@ -908,7 +911,14 @@
         : state.alphabetChar + state.alphabetChar + state.alphabetChar;
 
     host.innerHTML = "";
+    if (quickHost) quickHost.innerHTML = "";
     const metas = typeof FORM_META !== "undefined" ? FORM_META : [];
+    const selectForm = (formId) => {
+      applyAlphabetForm(state.alphabetChar, formId);
+      buildForms();
+      buildAlphabet();
+      buildPracticeWords();
+    };
     for (const meta of metas) {
       const glyph = pack.forms[meta.id] || isolated;
       const sameAsIsolated =
@@ -932,13 +942,26 @@
         </span>
       `;
       card.title = `${meta.labelEn} · ${meta.hint}`;
-      card.addEventListener("click", () => {
-        applyAlphabetForm(state.alphabetChar, meta.id);
-        buildForms();
-        buildAlphabet();
-        buildPracticeWords();
-      });
+      card.addEventListener("click", () => selectForm(meta.id));
       host.appendChild(card);
+
+      if (quickHost) {
+        const quickButton = document.createElement("button");
+        quickButton.type = "button";
+        quickButton.className =
+          "quick-form-btn" +
+          (meta.id === state.formId && state.drillKind === "form" ? " active" : "");
+        quickButton.title = `${meta.labelEn} · ${meta.hint}`;
+        const quickGlyph = document.createElement("span");
+        quickGlyph.className = "quick-form-glyph";
+        quickGlyph.textContent = glyph;
+        const quickLabel = document.createElement("span");
+        quickLabel.className = "quick-form-label";
+        quickLabel.textContent = state.uiLanguage === "ar" ? meta.labelAr : meta.labelEn;
+        quickButton.append(quickGlyph, quickLabel);
+        quickButton.addEventListener("click", () => selectForm(meta.id));
+        quickHost.appendChild(quickButton);
+      }
     }
 
     // Connect card — full width
@@ -964,13 +987,26 @@
       </span>
     `;
     chainCard.title = `${chainMeta.labelEn} · ${chainMeta.hint}`;
-    chainCard.addEventListener("click", () => {
-      applyAlphabetForm(state.alphabetChar, "chain");
-      buildForms();
-      buildAlphabet();
-      buildPracticeWords();
-    });
+    chainCard.addEventListener("click", () => selectForm("chain"));
     host.appendChild(chainCard);
+
+    if (quickHost) {
+      const quickChain = document.createElement("button");
+      quickChain.type = "button";
+      quickChain.className =
+        "quick-form-btn" +
+        (state.formId === "chain" && state.drillKind === "chain" ? " active" : "");
+      quickChain.title = `${chainMeta.labelEn} · ${chainMeta.hint}`;
+      const quickGlyph = document.createElement("span");
+      quickGlyph.className = "quick-form-glyph";
+      quickGlyph.textContent = chainGlyph;
+      const quickLabel = document.createElement("span");
+      quickLabel.className = "quick-form-label";
+      quickLabel.textContent = state.uiLanguage === "ar" ? chainMeta.labelAr : chainMeta.labelEn;
+      quickChain.append(quickGlyph, quickLabel);
+      quickChain.addEventListener("click", () => selectForm("chain"));
+      quickHost.appendChild(quickChain);
+    }
 
     if (note) {
       const entry =
@@ -1153,16 +1189,27 @@
   if (randomWordBtn) {
     randomWordBtn.addEventListener("click", applyRandomWord);
   }
+  const dockRandomWordBtn = document.getElementById("dockRandomWordBtn");
+  if (dockRandomWordBtn) {
+    dockRandomWordBtn.addEventListener("click", applyRandomWord);
+  }
 
   const randomAlphabetWordBtn = document.getElementById("randomAlphabetWordBtn");
+  function applyRandomAlphabetWord() {
+    const word =
+      typeof randomAlphabetPracticeWord === "function"
+        ? randomAlphabetPracticeWord(state.alphabetChar, state.wordPractice)
+        : "";
+    if (word) applyPracticeWord(word);
+  }
   if (randomAlphabetWordBtn) {
-    randomAlphabetWordBtn.addEventListener("click", () => {
-      const word =
-        typeof randomAlphabetPracticeWord === "function"
-          ? randomAlphabetPracticeWord(state.alphabetChar, state.wordPractice)
-          : "";
-      if (word) applyPracticeWord(word);
-    });
+    randomAlphabetWordBtn.addEventListener("click", applyRandomAlphabetWord);
+  }
+  const dockRandomAlphabetWordBtn = document.getElementById(
+    "dockRandomAlphabetWordBtn"
+  );
+  if (dockRandomAlphabetWordBtn) {
+    dockRandomAlphabetWordBtn.addEventListener("click", applyRandomAlphabetWord);
   }
 
   function syncFromInput(commit) {

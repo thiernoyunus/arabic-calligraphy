@@ -360,9 +360,37 @@ select {
   display: flex;
 }
 
-/* Alphabet strip sits above workspace — always column flex when writing */
-.app.is-writing .alphabet-strip.writing-only {
+/* The writing choices stay visible before the paper on every screen size. */
+.app.is-writing .writing-quick-access.writing-only {
   display: flex;
+}
+
+.writing-quick-access {
+  width: min(100%, 1180px);
+  margin: 0 auto 18px;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quick-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quick-picker-label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.quick-swipe-hint {
+  display: none;
+}
+
+/* The detailed form chooser remains in the desktop lesson rail. */
+.quick-picker + .quick-picker {
+  display: none;
 }
 
 /* Writing lesson rail */
@@ -404,6 +432,42 @@ select {
   justify-content: center;
   gap: 6px;
   direction: rtl;
+}
+
+.writing-quick-access .alphabet-strip {
+  display: flex;
+  width: 100%;
+  margin: 0;
+}
+
+.quick-form-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quick-form-btn {
+  min-height: 38px;
+  padding: 7px 11px;
+  border: 1px solid rgba(26, 23, 20, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.72);
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  line-height: 1;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.quick-form-btn:hover {
+  border-color: rgba(26, 23, 20, 0.3);
+  color: var(--ink);
+}
+
+.quick-form-btn.active {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 500;
 }
 
 .alphabet-btn {
@@ -622,14 +686,15 @@ select {
   margin-bottom: 12px;
 }
 
-/* Tools live in the right rail — quieter under-paper chrome */
+/* The controls under the paper are core actions, not background decoration. */
 .app.is-writing .canvas-footer {
-  opacity: 0.55;
+  opacity: 1;
 }
 
 .app.is-writing .hint {
   max-width: var(--canvas);
   font-size: 0.78rem;
+  color: var(--ink-soft);
 }
 
 /* Connect is the star action in the lesson rail */
@@ -800,6 +865,11 @@ select {
   align-items: center;
 }
 
+.app.is-writing #dockRandomAlphabetWordBtn,
+.app.is-calligraphy #dockRandomWordBtn {
+  display: none;
+}
+
 /* Pen / Eraser switch — right under the paper */
 .tool-seg {
   display: inline-flex;
@@ -914,11 +984,17 @@ select {
   outline-offset: 2px;
 }
 
+.quick-form-btn:focus-visible {
+  outline: 2px solid rgba(139, 58, 42, 0.65);
+  outline-offset: 2px;
+}
+
 .pill {
   padding: 6px 14px;
   min-height: 34px;
   border-radius: 999px;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(26, 23, 20, 0.2);
+  background: rgba(255, 253, 248, 0.72);
   color: var(--ink-soft);
   font-size: 0.78rem;
   letter-spacing: 0.01em;
@@ -931,6 +1007,16 @@ select {
   background: rgba(26, 23, 20, 0.04);
   border-color: rgba(26, 23, 20, 0.18);
   color: var(--ink);
+}
+
+.canvas-footer .pill {
+  color: var(--ink-soft);
+}
+
+.canvas-footer .pill-toggle.active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
 }
 
 .stroke-count {
@@ -1365,6 +1451,101 @@ input[type="range"]::-moz-range-thumb {
   border-bottom-color: var(--ink);
 }
 
+/* Script choice deserves to read as a clear decision, not helper text. */
+#styleHint {
+  margin-bottom: 12px;
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+#styleSeg.styles {
+  gap: 8px;
+  align-items: center;
+}
+
+#styleSeg .seg-btn {
+  min-height: 36px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.6);
+  color: var(--ink-soft);
+  font-size: 0.84rem;
+  line-height: 1;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s, transform 0.15s;
+}
+
+#styleSeg .seg-btn:hover {
+  border-color: rgba(26, 23, 20, 0.28);
+  color: var(--ink);
+}
+
+#styleSeg .seg-btn.active {
+  border-bottom-color: var(--ink);
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 500;
+}
+
+/* Other choice controls use the same clear selected state as script styles. */
+.form-card.active {
+  border-color: var(--ink);
+  background: var(--ink);
+  box-shadow: none;
+}
+
+.form-card.active .form-glyph,
+.form-card.active .form-label-ar,
+.form-card.active .form-label-en {
+  color: var(--paper);
+}
+
+.form-card.form-card-chain.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: none;
+}
+
+.form-card.form-card-chain.active .form-label-en {
+  color: rgba(247, 242, 232, 0.82);
+}
+
+.practice-word-btn.active {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+div.seg[aria-label="surface"] {
+  align-items: center;
+  gap: 8px;
+}
+
+.seg [data-surface] {
+  min-height: 36px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.6);
+  color: var(--ink-soft);
+  line-height: 1;
+}
+
+.seg [data-surface]:hover {
+  border-color: rgba(26, 23, 20, 0.28);
+  color: var(--ink);
+}
+
+.seg [data-surface].active {
+  border-bottom-color: var(--ink);
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 500;
+}
+
 .check-row {
   display: flex;
   align-items: center;
@@ -1588,10 +1769,82 @@ input[type="range"]::-moz-range-thumb {
   }
 
   .alphabet-btn {
-    min-width: var(--tap);
+    /* Show part of the next letter so the alphabet reads as scrollable. */
+    min-width: 46px;
     min-height: var(--tap);
     flex-shrink: 0;
     font-size: 1.25rem;
+  }
+
+  .quick-picker + .quick-picker {
+    display: flex;
+  }
+
+  .quick-picker-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .quick-swipe-hint {
+    display: inline;
+    color: var(--ink-soft);
+    font-size: 0.68rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .quick-form-strip {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 8px 10px;
+    border: 1px solid rgba(26, 23, 20, 0.08);
+    border-radius: 12px;
+    background: rgba(255, 253, 248, 0.7);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    direction: rtl;
+  }
+
+  .quick-form-strip::-webkit-scrollbar {
+    display: none;
+  }
+
+  .quick-form-btn {
+    display: flex;
+    flex: 0 0 64px;
+    min-height: 60px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    padding: 4px 5px;
+    border-color: transparent;
+    border-radius: 8px;
+  }
+
+  .quick-form-btn.active {
+    border-color: rgba(26, 23, 20, 0.35);
+    background: #fff;
+    color: var(--ink);
+    box-shadow: 0 1px 6px rgba(60, 40, 20, 0.08);
+  }
+
+  .quick-form-glyph {
+    min-height: 1.2em;
+    font-family: "Noto Naskh Arabic", "Amiri", serif;
+    font-size: 1.35rem;
+    font-weight: 500;
+    line-height: 1.1;
+    direction: rtl;
+  }
+
+  .quick-form-label {
+    font-size: 0.62rem;
+    line-height: 1.1;
   }
 
   /* Forms: 2×2 still works; larger taps */
@@ -1808,6 +2061,26 @@ input[type="range"]::-moz-range-thumb {
 
   .stroke-count {
     display: none; /* noise on phone */
+  }
+
+  /* The top form chooser already covers this on phones. */
+  .app.is-writing .writing-rail .forms-block {
+    display: none;
+  }
+
+  .app.is-writing .writing-rail .practice-words-block .writing-random-word {
+    display: none;
+  }
+
+  .app.is-calligraphy .calligraphy-style-strip > .random-word-btn {
+    display: none;
+  }
+
+  .app.is-writing #dockRandomAlphabetWordBtn.dock-random-btn,
+  .app.is-calligraphy #dockRandomWordBtn.dock-random-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   /* Fatter pen size slider for thumbs */
