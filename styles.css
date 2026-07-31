@@ -657,10 +657,13 @@ select {
 
 .calligraphy-style-strip {
   width: min(100%, 640px);
-  display: flex;
   flex-direction: column;
   gap: 8px;
   margin: 0 auto 12px;
+}
+
+.app.is-calligraphy .calligraphy-style-strip.calligraphy-only {
+  display: flex;
 }
 
 /* Paper first on narrow screens; forms before secondary pen-size panel */
