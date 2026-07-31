@@ -651,11 +651,6 @@ class PaperSurface {
 
       const ang = this.penAngleDeg || 35;
       this._drawPenAngleHint(m + 22, baseline + nuqta * 3.4, ang, 0.28);
-
-      this._label(m + 4, baseline - 4, "baseline", 0.35);
-      this._label(m + 4, alifTop - 3, "alif", 0.3);
-      this._label(ladderX - 36, baseline - nuqta * 3 - 2, "nuqṭa", 0.28);
-      this._label(m + 8, baseline + nuqta * 4.6, `pen ${ang}°`, 0.32);
     }
   }
 
@@ -768,9 +763,6 @@ class PaperSurface {
 
     const ang = this.penAngleDeg || 55;
     this._drawPenAngleHint(m + 22, m + boxH * 0.82, ang, 0.28);
-    if (this.showMeasures) {
-      this._label(m + 8, m + boxH * 0.88, `pen ${ang}° · hang`, 0.32);
-    }
   }
 
   /** Classical nuqṭa = diamond from the pen tip */
