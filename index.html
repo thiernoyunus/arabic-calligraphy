@@ -31,7 +31,7 @@
     href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Aref+Ruqaa:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Gulzar&family=Harmattan:wght@400;500;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500&family=Mirza:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   />
-  <link rel="stylesheet" href="styles.css?v=8" />
+  <link rel="stylesheet" href="styles.css?v=12" />
 </head>
 <body>
   <div class="app" data-ui-language="en">
@@ -100,8 +100,24 @@
       </nav>
     </header>
 
-    <!-- Writing: letter picker -->
-    <div class="alphabet-strip writing-only" id="alphabetStrip" aria-label="Arabic alphabet"></div>
+    <!-- Writing: the two choices learners need before reaching the paper -->
+    <section class="writing-quick-access writing-only" aria-label="Writing quick access">
+      <div class="quick-picker">
+        <div class="quick-picker-label">
+          <span class="ui-en">Pick a letter</span>
+          <span class="quick-swipe-hint ui-en">swipe left for more ←</span>
+          <span class="ui-ar">اختر حرفًا</span>
+          <span class="quick-swipe-hint ui-ar">اسحب لليسار للمزيد ←</span>
+        </div>
+        <div class="alphabet-strip" id="alphabetStrip" aria-label="Arabic alphabet"></div>
+      </div>
+      <div class="quick-picker">
+        <div class="quick-picker-label">
+          <span class="ui-en">Choose a form</span><span class="ui-ar">اختر شكلًا</span>
+        </div>
+        <div class="quick-form-strip" id="quickFormStrip" role="group" aria-label="Letter form"></div>
+      </div>
+    </section>
     <div class="calligraphy-style-strip calligraphy-only" aria-label="Calligraphy styles">
       <span class="presets-label ui-en">Style</span>
       <span class="presets-label ui-ar">نوع الخط</span>
@@ -201,6 +217,12 @@
             <button type="button" class="pill" id="clearBtn" title="Clear the whole paper">
               Clear page
             </button>
+            <button type="button" class="pill pill-accent dock-random-btn writing-only" id="dockRandomAlphabetWordBtn">
+              Random practice word
+            </button>
+            <button type="button" class="pill pill-accent dock-random-btn calligraphy-only" id="dockRandomWordBtn">
+              Random word
+            </button>
             <button type="button" class="pill pill-accent" id="dockShowMeBtn">
               Watch the stroke order
             </button>
@@ -291,6 +313,6 @@
   <script src="glyph.js?v=4"></script>
   <script src="brush.js?v=4"></script>
   <script src="keyboard.js?v=4"></script>
-  <script src="app.js?v=6"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>
