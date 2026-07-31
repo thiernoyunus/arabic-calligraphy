@@ -178,8 +178,7 @@
     buildAlphabet();
     buildForms();
     buildPracticeWords();
-    if (state.practice === "writing") refreshWritingHint();
-    else {
+    if (state.practice !== "writing") {
       const styleHint = document.getElementById("styleHint");
       if (styleHint) {
         styleHint.textContent =
