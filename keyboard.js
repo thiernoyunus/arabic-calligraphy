@@ -26,14 +26,19 @@ const ARABIC_KEYBOARD = {
  * onChange(text) fires after every edit.
  * onCommit(text) fires when user taps Practice / Enter.
  */
-function mountArabicKeyboard(rootEl, { getValue, setValue, onChange, onCommit }) {
+function mountArabicKeyboard(
+  rootEl,
+  { getValue, getLanguage, setValue, onChange, onCommit }
+) {
   let shifted = false;
   let marksOpen = false;
 
   rootEl.classList.add("ar-keyboard");
   rootEl.setAttribute("role", "group");
-  rootEl.setAttribute("aria-label", "Arabic keyboard · لوحة مفاتيح عربية");
   rootEl.dir = "rtl";
+
+  const language = () => (getLanguage?.() === "ar" ? "ar" : "en");
+  const label = (en, ar) => (language() === "ar" ? ar : en);
 
   const rowsEl = document.createElement("div");
   rowsEl.className = "ar-kb-rows";
@@ -112,8 +117,10 @@ function mountArabicKeyboard(rootEl, { getValue, setValue, onChange, onCommit })
     const shiftBtn = makeKey(shifted ? "أب" : "ًَُ", {
       action: true,
       wide: true,
-      title: shifted ? "Letters" : "Marks & forms",
-      aria: shifted ? "Show letters" : "Show marks and alternate forms",
+      title: shifted ? label("Letters", "حروف") : label("Marks and forms", "تشكيل وأشكال"),
+      aria: shifted
+        ? label("Show letters", "إظهار الحروف")
+        : label("Show marks and alternate forms", "إظهار التشكيل والأشكال الأخرى"),
       onClick: () => {
         shifted = !shifted;
         renderRows();
@@ -124,28 +131,28 @@ function mountArabicKeyboard(rootEl, { getValue, setValue, onChange, onCommit })
 
     actions.appendChild(shiftBtn);
     actions.appendChild(
-      makeKey("مسافة", {
+      makeKey(label("Space", "مسافة"), {
         action: true,
         wide: true,
-        title: "Space",
-        aria: "Space",
+        title: label("Space", "مسافة"),
+        aria: label("Space", "مسافة"),
         onClick: () => insert(" "),
       })
     );
     actions.appendChild(
       makeKey("⌫", {
         action: true,
-        title: "Backspace",
-        aria: "Backspace",
+        title: label("Backspace", "حذف"),
+        aria: label("Backspace", "حذف"),
         onClick: () => backspace(),
       })
     );
     actions.appendChild(
-      makeKey("تمرين", {
+      makeKey(label("Practice", "تمرّن"), {
         action: true,
         wide: true,
-        title: "Practice this word",
-        aria: "Practice",
+        title: label("Practice this word", "تدرّب على هذه الكلمة"),
+        aria: label("Practice", "تمرّن"),
         onClick: () => {
           const t = currentText().trim();
           if (t) onCommit?.(t);
@@ -172,10 +179,14 @@ function mountArabicKeyboard(rootEl, { getValue, setValue, onChange, onCommit })
 
   function renderToolbar() {
     toolbar.innerHTML = "";
+    rootEl.setAttribute(
+      "aria-label",
+      label("Arabic keyboard", "لوحة مفاتيح عربية")
+    );
     const marksToggle = document.createElement("button");
     marksToggle.type = "button";
     marksToggle.className = "ar-kb-chip" + (marksOpen ? " active" : "");
-    marksToggle.textContent = "تشكيل · marks";
+    marksToggle.textContent = label("Marks", "تشكيل");
     marksToggle.addEventListener("click", () => {
       marksOpen = !marksOpen;
       renderRows();
@@ -185,12 +196,15 @@ function mountArabicKeyboard(rootEl, { getValue, setValue, onChange, onCommit })
     const clearBtn = document.createElement("button");
     clearBtn.type = "button";
     clearBtn.className = "ar-kb-chip";
-    clearBtn.textContent = "مسح النص · clear text";
+    clearBtn.textContent = label("Clear text", "مسح النص");
     clearBtn.addEventListener("click", () => clearAll());
 
     const hint = document.createElement("span");
     hint.className = "ar-kb-hint";
-    hint.textContent = "No Arabic keyboard? Type here · للوحة المفاتيح";
+    hint.textContent = label(
+      "Use these keys to type Arabic.",
+      "استخدم هذه المفاتيح للكتابة بالعربية."
+    );
 
     toolbar.appendChild(hint);
     toolbar.appendChild(marksToggle);

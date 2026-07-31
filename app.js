@@ -42,7 +42,153 @@
     textSize: 1,
     current: findLetter("ببب"),
     kbOpen: true,
+    hasWatched: false,
+    uiLanguage: (() => {
+      try {
+        return localStorage.getItem("ink-ui-language") === "ar" ? "ar" : "en";
+      } catch (_) {
+        return "en";
+      }
+    })(),
   };
+
+  const UI = {
+    en: {
+      forms: "Letter forms",
+      words: "Practice words",
+      hideKeyboard: "Hide keyboard",
+      showKeyboard: "Show keyboard",
+      typeArabic: "Type Arabic",
+      randomWord: "Random word",
+      pen: "Pen",
+      eraser: "Eraser",
+      undo: "Undo",
+      clear: "Clear page",
+      watch: "Watch the stroke order",
+      watching: "Writing…",
+      watchAgain: "Watch again",
+      traceOn: "Tracing outline: on",
+      traceOff: "Tracing outline: off",
+      penSize: "Pen size",
+      textSize: "Text size",
+      writingHelp: "Watch first, then trace the light outline on the paper.",
+      outlineHelp: "The tracing outline stays on while you practice.",
+      outlineSettings: "Changes the tracing outline on the paper.",
+      paper: "Paper",
+      plain: "Plain",
+      lines: "Lines",
+      watchTitle: "Watch the stroke order",
+      watchHelp: "Watch once. The paper will reset to the tracing outline for your turn.",
+      yourTurn: "Your turn — trace the light outline.",
+      randomHint: "Random word · {word}. Watch the stroke order, then trace the light outline.",
+    },
+    ar: {
+      forms: "أشكال الحروف",
+      words: "كلمات للتدريب",
+      hideKeyboard: "إخفاء لوحة المفاتيح",
+      showKeyboard: "إظهار لوحة المفاتيح",
+      typeArabic: "اكتب بالعربية",
+      randomWord: "كلمة عشوائية",
+      pen: "قلم",
+      eraser: "ممحاة",
+      undo: "تراجع",
+      clear: "مسح الصفحة",
+      watch: "شاهد ترتيب الخطوات",
+      watching: "جارٍ العرض…",
+      watchAgain: "شاهد مرة أخرى",
+      traceOn: "نموذج التتبع: ظاهر",
+      traceOff: "نموذج التتبع: مخفي",
+      penSize: "حجم القلم",
+      textSize: "حجم النص",
+      writingHelp: "شاهد أولًا، ثم تتبع النموذج الفاتح على الورقة.",
+      outlineHelp: "يبقى نموذج التتبع ظاهرًا أثناء التدريب.",
+      outlineSettings: "يغيّر نموذج التتبع على الورقة.",
+      paper: "الورق",
+      plain: "سادة",
+      lines: "سطور",
+      watchTitle: "شاهد ترتيب الخطوات",
+      watchHelp: "شاهد مرة، ثم تعود الورقة إلى نموذج التتبع لتجرب بنفسك.",
+      yourTurn: "حان دورك — تتبع النموذج الفاتح.",
+      randomHint: "كلمة عشوائية · {word}. شاهد ترتيب الخطوات ثم تتبع النموذج الفاتح.",
+    },
+  };
+
+  let keyboardController = null;
+
+  function t(key, values = {}) {
+    let text = UI[state.uiLanguage][key] || UI.en[key] || key;
+    for (const [name, value] of Object.entries(values)) {
+      text = text.replace(`{${name}}`, value);
+    }
+    return text;
+  }
+
+  function setUiText(id, key) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = t(key);
+  }
+
+  function showMeLabel() {
+    if (state.teaching) return t("watching");
+    return t(state.hasWatched ? "watchAgain" : "watch");
+  }
+
+  function syncActionLabels() {
+    const label = showMeLabel();
+    [teachPlayBtn, showMeBtn, writingShowMeBtn, dockShowMeBtn]
+      .filter(Boolean)
+      .forEach((btn) => {
+        btn.textContent = label;
+        btn.setAttribute("aria-label", label);
+      });
+  }
+
+  function setUiLanguage(language) {
+    state.uiLanguage = language === "ar" ? "ar" : "en";
+    const appEl = document.querySelector(".app");
+    if (appEl) appEl.dataset.uiLanguage = state.uiLanguage;
+    document.documentElement.lang = state.uiLanguage;
+    document.querySelectorAll("[data-ui-language-choice]").forEach((btn) => {
+      const on = btn.dataset.uiLanguageChoice === state.uiLanguage;
+      btn.classList.toggle("active", on);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      el.textContent = t(el.dataset.i18n);
+    });
+    setUiText("penToolBtn", "pen");
+    setUiText("eraseToolBtn", "eraser");
+    setUiText("undoBtn", "undo");
+    setUiText("clearBtn", "clear");
+    setUiText("randomWordBtn", "randomWord");
+    if (typeInput) typeInput.placeholder = t("typeArabic");
+    if (kbToggle) {
+      kbToggle.textContent = t(state.kbOpen ? "hideKeyboard" : "showKeyboard");
+    }
+    syncGhostUi();
+    syncActionLabels();
+    keyboardController?.refresh?.();
+    rebuildStyleButtonsForPractice();
+    buildAlphabet();
+    buildForms();
+    buildPracticeWords();
+    if (state.practice === "writing") refreshWritingHint();
+    else {
+      const styleHint = document.getElementById("styleHint");
+      if (styleHint) {
+        styleHint.textContent =
+          state.uiLanguage === "ar"
+            ? "اختر نوع الخط الذي تريد التدريب عليه."
+            : getStyleProfile(state.style).description;
+      }
+      updateHint();
+    }
+    try {
+      localStorage.setItem("ink-ui-language", state.uiLanguage);
+    } catch (_) {
+      /* language still works for this visit */
+    }
+  }
 
   // ── size ──────────────────────────────────────────────
   function cssSize() {
@@ -191,6 +337,7 @@
     if (dockGhostBtn) {
       dockGhostBtn.classList.toggle("active", !!state.ghost);
       dockGhostBtn.setAttribute("aria-pressed", state.ghost ? "true" : "false");
+      dockGhostBtn.textContent = t(state.ghost ? "traceOn" : "traceOff");
     }
   }
 
@@ -229,7 +376,6 @@
   async function runShowMe() {
     if (state.teaching) return;
     state.teaching = true;
-    const label = "أرني · show me";
     const playBtns = [
       teachPlayBtn,
       showMeBtn,
@@ -238,20 +384,29 @@
     ].filter(Boolean);
     for (const b of playBtns) {
       b.disabled = true;
-      b.textContent = "…";
     }
+    syncActionLabels();
     // Hide guide while Show me runs — two copies caused a double shadow
     updateGuides();
     try {
       await showMeStroke();
+      await new Promise((resolve) => setTimeout(resolve, 700));
+      brush.clear();
+      updateCount();
+      state.hasWatched = true;
+      setGhost(true);
+      if (hint && hintText) {
+        hint.hidden = false;
+        hintText.textContent = t("yourTurn");
+      }
     } catch (err) {
       console.warn("Show me failed:", err);
     } finally {
       state.teaching = false;
       for (const b of playBtns) {
         b.disabled = false;
-        b.textContent = label;
       }
+      syncActionLabels();
       updateGuides();
     }
   }
@@ -370,7 +525,10 @@
     // Style hint under the picker
     const styleHint = document.getElementById("styleHint");
     if (styleHint && profile.description) {
-      styleHint.textContent = profile.description;
+      styleHint.textContent =
+        state.uiLanguage === "ar"
+          ? "اختر نوع الخط الذي تريد التدريب عليه."
+          : profile.description;
     }
 
     // Paper ruling from style (naskh lines, kufic squares, nastaliq hang)
@@ -419,6 +577,7 @@
   // ── Practice path: Writing vs Calligraphy ─────────────
   function setPractice(practice) {
     state.practice = practice === "calligraphy" ? "calligraphy" : "writing";
+    state.hasWatched = false;
     document.body.classList.toggle("is-writing", state.practice === "writing");
     document.body.classList.toggle(
       "is-calligraphy",
@@ -502,11 +661,15 @@
       btn.type = "button";
       btn.className = "seg-btn" + (id === state.style ? " active" : "");
       btn.dataset.style = id;
-      btn.textContent = shortArabicLabel(profile);
-      btn.title = `${profile.englishName} · ${profile.arabicName}`;
+      btn.textContent =
+        state.uiLanguage === "ar"
+          ? shortArabicLabel(profile)
+          : profile.englishName;
+      btn.title =
+        state.uiLanguage === "ar" ? profile.arabicName : profile.englishName;
       btn.setAttribute(
         "aria-label",
-        `${profile.englishName} ${profile.arabicName}`
+        state.uiLanguage === "ar" ? profile.arabicName : profile.englishName
       );
       btn.addEventListener("click", () => {
         styleSeg
@@ -532,7 +695,7 @@
         "alphabet-btn" +
         (entry.char === state.alphabetChar ? " active" : "");
       btn.textContent = entry.char;
-      btn.title = `${entry.nameAr} · ${entry.name}`;
+      btn.title = state.uiLanguage === "ar" ? entry.nameAr : entry.name;
       btn.addEventListener("click", () => {
         // New letter: Connect first if it joins (workbook pattern), else Alone
         const pack =
@@ -587,10 +750,63 @@
     }, 320);
   }
 
+  function refreshWritingHint() {
+    if (!hint || !hintText) return;
+    const entry =
+      typeof getAlphabetEntry === "function"
+        ? getAlphabetEntry(state.alphabetChar)
+        : null;
+    if (!entry) return;
+
+    if (state.drillKind === "word" && state.wordPractice) {
+      const name =
+        state.uiLanguage === "ar" ? entry.nameAr : entry.name;
+      hint.hidden = false;
+      hintText.textContent =
+        state.uiLanguage === "ar"
+          ? `${name} · تدرّب على كلمة «${state.wordPractice}». شاهد ترتيب الخطوات ثم تتبع النموذج الفاتح.`
+          : `${name} · Practice the word «${state.wordPractice}». Watch the stroke order, then trace the light outline.`;
+      return;
+    }
+
+    const pack =
+      typeof getLetterForms === "function"
+        ? getLetterForms(state.alphabetChar)
+        : { connectsLeft: true };
+    const meta =
+      state.formId === "chain"
+        ? typeof CHAIN_META !== "undefined"
+          ? CHAIN_META
+          : null
+        : typeof FORM_META !== "undefined"
+          ? FORM_META.find((form) => form.id === state.formId)
+          : null;
+    if (!meta) return;
+
+    const joinNote =
+      !pack.connectsLeft && state.formId !== "chain"
+        ? state.uiLanguage === "ar"
+          ? " لا يتصل هذا الحرف بما بعده، لذلك يشبه الأول والوسط المنفصل."
+          : " This letter does not connect to the next one, so Start and Middle look like Alone."
+        : "";
+    const chainNote =
+      state.formId === "chain"
+        ? state.uiLanguage === "ar"
+          ? " راقب اتصال الحرف من الأول إلى الوسط ثم الأخير."
+          : " Watch how the letter joins from start to middle to end."
+        : "";
+    hint.hidden = false;
+    hintText.textContent =
+      state.uiLanguage === "ar"
+        ? `تدرّب على ${entry.nameAr}. ابدأ بشكل ${meta.labelAr}. شاهد ترتيب الخطوات ثم تتبع النموذج الفاتح.${joinNote}${chainNote}`
+        : `Practice ${entry.name}. ${meta.labelEn}: ${meta.hint}. Watch the stroke order, then trace the light outline.${joinNote}${chainNote}`;
+  }
+
   function applyAlphabetForm(char, formId) {
     state.alphabetChar = char;
     state.formId = formId || "isolated";
     state.wordPractice = null;
+    state.hasWatched = false;
 
     const pack =
       typeof getLetterForms === "function"
@@ -622,31 +838,7 @@
     updateLetterTitle();
 
     // Tip for writing mode (set after setLetter so it isn’t overwritten)
-    const entry =
-      typeof getAlphabetEntry === "function" ? getAlphabetEntry(char) : null;
-    const chainMeta =
-      typeof CHAIN_META !== "undefined" ? CHAIN_META : null;
-    const meta =
-      state.formId === "chain"
-        ? chainMeta
-        : typeof FORM_META !== "undefined"
-          ? FORM_META.find((f) => f.id === state.formId)
-          : null;
-
-    if (entry && meta) {
-      const joinNote =
-        !pack.connectsLeft && state.formId !== "chain"
-          ? " This letter doesn’t connect to the next one, so Start/Middle look like Alone."
-          : "";
-      const chainNote =
-        state.formId === "chain"
-          ? " Watch how the letter joins start → middle → end."
-          : "";
-      if (hint && hintText) {
-        hint.hidden = false;
-        hintText.textContent = `${entry.nameAr} (${entry.name}) · ${meta.labelEn} (${meta.hint}). Trace it, or Show me.${joinNote}${chainNote} · `;
-      }
-    }
+    refreshWritingHint();
 
     // Mobile: jump back to the paper so they can draw immediately
     requestAnimationFrame(scrollPaperIntoView);
@@ -656,6 +848,7 @@
     state.drillKind = "word";
     state.wordPractice = word;
     state.formId = null;
+    state.hasWatched = false;
     if (state.practice === "writing" && state.style !== "naskh") {
       applyStyle("naskh");
     }
@@ -666,17 +859,7 @@
     buildForms();
     buildPracticeWords();
 
-    const entry =
-      typeof getAlphabetEntry === "function"
-        ? getAlphabetEntry(state.alphabetChar)
-        : null;
-    if (hint && hintText) {
-      hint.hidden = false;
-      const name = entry
-        ? `${entry.nameAr} (${entry.name})`
-        : state.alphabetChar;
-      hintText.textContent = `${name} · practice word «${word}». Trace it, or Show me. · `;
-    }
+    refreshWritingHint();
 
     requestAnimationFrame(scrollPaperIntoView);
   }
@@ -767,8 +950,12 @@
         ? `${entry.nameAr} · ${entry.name}`
         : state.alphabetChar;
       note.textContent = pack.connectsLeft
-        ? `Tap Alone, Start, Middle, End — or Connect to join all three.`
-        : `This letter doesn’t join left. Practice Alone & End. Connect still shows the letter thrice.`;
+        ? state.uiLanguage === "ar"
+          ? "اختر منفصل أو أول أو وسط أو آخر أو وصل لرؤية اتصال الحروف."
+          : "Choose a letter form, then watch the stroke order and trace it."
+        : state.uiLanguage === "ar"
+          ? "هذا الحرف لا يتصل بالحرف الذي بعده. تدرّب على المنفصل أو الأخير."
+          : "This letter does not join to the next letter. Practice Alone or End.";
       // Keep name visible in letter title; note stays instructional
       if (entry) {
         note.setAttribute("data-letter", name);
@@ -920,13 +1107,14 @@
         ? randomPracticeWord(avoid)
         : "سلام";
     if (typeInput) typeInput.value = word;
+    state.hasWatched = false;
     setLetter(word);
     brush.clear();
     updateCount();
     setGhost(true);
     if (hint && hintText) {
       hint.hidden = false;
-      hintText.textContent = `Random word · ${word} — trace the guide or Show me. · `;
+      hintText.textContent = t("randomHint", { word });
     }
   }
 
@@ -954,6 +1142,7 @@
     updatePresetsActive();
     updateHint();
     if (commit) {
+      state.hasWatched = false;
       brush.clear();
       updateCount();
       setLetter(trimmed);
@@ -973,8 +1162,9 @@
 
   // ── On-screen Arabic keyboard (calligraphy only UI; mount always) ──
   if (kbHost && typeof mountArabicKeyboard === "function" && typeInput) {
-    mountArabicKeyboard(kbHost, {
+    keyboardController = mountArabicKeyboard(kbHost, {
       getValue: () => typeInput.value,
+      getLanguage: () => state.uiLanguage,
       setValue: (t) => {
         typeInput.value = t;
       },
@@ -991,7 +1181,7 @@
       state.kbOpen = !state.kbOpen;
       kbDock.classList.toggle("is-collapsed", !state.kbOpen);
       kbToggle.setAttribute("aria-expanded", state.kbOpen ? "true" : "false");
-      kbToggle.textContent = state.kbOpen ? "إخفاء · hide" : "إظهار · show";
+      kbToggle.textContent = t(state.kbOpen ? "hideKeyboard" : "showKeyboard");
       // When keyboard rail is collapsed, give the paper more room
       document.documentElement.style.setProperty(
         "--kb-w",
@@ -1060,6 +1250,10 @@
   // Default path: Writing (alphabet) — most learners need this first
   setPractice("writing");
   setGhost(true); // guide on by default in every mode
+  document.querySelectorAll("[data-ui-language-choice]").forEach((btn) => {
+    btn.addEventListener("click", () => setUiLanguage(btn.dataset.uiLanguageChoice));
+  });
+  setUiLanguage(state.uiLanguage);
   resize();
   window.addEventListener("resize", resize);
   window.addEventListener("orientationchange", () => {

@@ -34,11 +34,15 @@
   <link rel="stylesheet" href="styles.css?v=4" />
 </head>
 <body>
-  <div class="app">
+  <div class="app" data-ui-language="en">
     <header class="title-block">
       <div class="title">
         <span class="title-ar">حبر</span>
         <span class="title-en">Ink</span>
+      </div>
+      <div class="language-switch" role="group" aria-label="Interface language">
+        <button type="button" class="lang-btn active" data-ui-language-choice="en" aria-pressed="true">English</button>
+        <button type="button" class="lang-btn" data-ui-language-choice="ar" aria-pressed="false" lang="ar">العربية</button>
       </div>
       <nav class="practice-modes" role="tablist" aria-label="Practice path">
         <button
@@ -49,9 +53,10 @@
           data-practice="writing"
           aria-selected="true"
         >
-          <span class="mode-ar">كتابة</span>
-          <span class="mode-en">Writing</span>
-          <span class="mode-sub">learn the alphabet</span>
+          <span class="mode-ar ui-ar">كتابة</span>
+          <span class="mode-en ui-en">Writing</span>
+          <span class="mode-sub ui-en">learn the alphabet</span>
+          <span class="mode-sub ui-ar">تعلّم الحروف</span>
         </button>
         <button
           type="button"
@@ -61,9 +66,10 @@
           data-practice="calligraphy"
           aria-selected="false"
         >
-          <span class="mode-ar">خط</span>
-          <span class="mode-en">Calligraphy</span>
-          <span class="mode-sub">styles of the pen</span>
+          <span class="mode-ar ui-ar">خط</span>
+          <span class="mode-en ui-en">Calligraphy</span>
+          <span class="mode-sub ui-en">styles of the pen</span>
+          <span class="mode-sub ui-ar">أنواع الخط</span>
         </button>
       </nav>
     </header>
@@ -85,12 +91,12 @@
           </p>
 
           <div class="forms-block">
-            <div class="presets-label">forms · أشكال</div>
+            <div class="presets-label" data-i18n="forms">Letter forms</div>
             <div class="forms-grid" id="formsGrid"></div>
           </div>
 
           <div class="practice-words-block">
-            <div class="presets-label">words · كلمات</div>
+            <div class="presets-label" data-i18n="words">Practice words</div>
             <div class="practice-words" id="practiceWords"></div>
           </div>
         </div>
@@ -99,11 +105,11 @@
         <div class="calligraphy-only">
           <div class="kb-rail-head">
             <div class="kb-rail-title">
-              <strong>لوحة</strong>
-              <span>keyboard</span>
+              <strong class="ui-ar">لوحة</strong>
+              <span class="ui-en">Arabic keyboard</span>
             </div>
             <button type="button" class="pill kb-toggle" id="kbToggle" aria-expanded="true">
-              إخفاء · hide
+              Hide keyboard
             </button>
           </div>
 
@@ -114,7 +120,7 @@
               dir="rtl"
               lang="ar"
               inputmode="none"
-              placeholder="اكتب · type"
+              placeholder="Type Arabic"
               autocomplete="off"
               spellcheck="false"
               enterkeyhint="done"
@@ -122,9 +128,9 @@
           </label>
 
           <div class="presets-block" id="presetsBlock">
-            <div class="presets-label">words · كلمات</div>
+            <div class="presets-label" data-i18n="words">Practice words</div>
             <button type="button" class="random-word-btn" id="randomWordBtn">
-              كلمة عشوائية · random word
+              Random word
             </button>
             <div class="presets" id="presets"></div>
           </div>
@@ -149,21 +155,21 @@
         <div class="canvas-footer" id="canvasFooter">
           <div class="tool-seg" role="group" aria-label="Drawing tool">
             <button type="button" class="tool-btn active" id="penToolBtn" data-tool="ink" aria-pressed="true">
-              قلم · pen
+              Pen
             </button>
             <button type="button" class="tool-btn" id="eraseToolBtn" data-tool="erase" aria-pressed="false">
-              ممحاة · eraser
+              Eraser
             </button>
           </div>
           <div class="footer-actions">
             <button type="button" class="pill" id="undoBtn" title="Remove last stroke">
-              تراجع · undo
+              Undo
             </button>
             <button type="button" class="pill" id="clearBtn" title="Clear the whole paper">
-              مسح الكل · clear all
+              Clear page
             </button>
             <button type="button" class="pill pill-accent" id="dockShowMeBtn">
-              أرني · show me
+              Watch the stroke order
             </button>
             <button
               type="button"
@@ -172,7 +178,7 @@
               aria-pressed="true"
               title="Show or hide the faint letter to trace"
             >
-              دليل · guide
+              Tracing outline: on
             </button>
           </div>
           <div class="stroke-count" id="strokeCount" aria-live="polite">0</div>
@@ -186,28 +192,28 @@
       <!-- Right tools -->
       <aside class="panel" dir="ltr">
         <section class="panel-block writing-only" id="writingTools">
-          <h2 class="panel-title"><span class="glyph">تمرين</span> size</h2>
-          <p class="teach-note">
-            Pen tools sit under the paper. Text size changes the guide letter right away.
+          <h2 class="panel-title"><span class="glyph ui-ar">تمرين</span><span class="ui-en">Size</span></h2>
+          <p class="teach-note" data-i18n="writingHelp">
+            Watch first, then trace the light outline on the paper.
           </p>
           <label class="slider-row">
-            <span class="slider-label">pen size</span>
+            <span class="slider-label" data-i18n="penSize">Pen size</span>
             <input type="range" id="writingWeight" min="0" max="1" step="0.01" value="0.5" />
             <span class="slider-val" id="writingWeightVal">0.50</span>
           </label>
           <label class="slider-row">
-            <span class="slider-label">text size</span>
+            <span class="slider-label" data-i18n="textSize">Text size</span>
             <input type="range" id="writingTextSize" min="0.5" max="1.5" step="0.05" value="1" />
             <span class="slider-val" id="writingTextSizeVal">1.00</span>
           </label>
-          <p class="teach-note subtle">Long words shrink to fit. Guide stays on while you practice.</p>
-          <button type="button" id="writingShowMeBtn" class="visually-hidden" tabindex="-1" aria-hidden="true">show me</button>
+          <p class="teach-note subtle" data-i18n="outlineHelp">The tracing outline stays on while you practice.</p>
+          <button type="button" id="writingShowMeBtn" class="visually-hidden" tabindex="-1" aria-hidden="true">Watch the stroke order</button>
           <input type="checkbox" id="writingGhostGuide" checked class="visually-hidden" tabindex="-1" aria-hidden="true" />
         </section>
 
         <div class="calligraphy-only">
           <section class="panel-block">
-            <h2 class="panel-title"><span class="glyph">قلم</span> style</h2>
+            <h2 class="panel-title"><span class="glyph ui-ar">قلم</span><span class="ui-en">Style</span></h2>
             <p class="teach-note subtle" id="styleHint">
               Pick a real script family. Naskh is the clear everyday hand.
             </p>
@@ -215,37 +221,37 @@
           </section>
 
           <section class="panel-block">
-            <h2 class="panel-title"><span class="glyph">حبر</span> pen</h2>
+            <h2 class="panel-title"><span class="glyph ui-ar">حبر</span><span class="ui-en">Pen</span></h2>
             <label class="slider-row">
-              <span class="slider-label">pen size</span>
+              <span class="slider-label" data-i18n="penSize">Pen size</span>
               <input type="range" id="weight" min="0" max="1" step="0.01" value="0.5" />
               <span class="slider-val" id="weightVal">0.50</span>
             </label>
             <label class="slider-row">
-              <span class="slider-label">text size</span>
+              <span class="slider-label" data-i18n="textSize">Text size</span>
               <input type="range" id="textSize" min="0.5" max="1.5" step="0.05" value="1" />
               <span class="slider-val" id="textSizeVal">1.00</span>
             </label>
-            <p class="teach-note subtle">
-              Changes the guide on the paper. Long phrases shrink or wrap to fit.
+            <p class="teach-note subtle" data-i18n="outlineSettings">
+              Changes the tracing outline on the paper.
             </p>
 
             <div class="field" style="margin-top: 12px">
-              <span class="field-label">paper</span>
+              <span class="field-label" data-i18n="paper">Paper</span>
               <div class="seg" role="group" aria-label="surface">
-                <button type="button" class="seg-btn active" data-surface="plain">plain</button>
-                <button type="button" class="seg-btn" data-surface="grid">lines</button>
+                <button type="button" class="seg-btn active" data-surface="plain" data-i18n="plain">Plain</button>
+                <button type="button" class="seg-btn" data-surface="grid" data-i18n="lines">Lines</button>
               </div>
             </div>
           </section>
 
           <section class="panel-block">
-            <h2 class="panel-title"><span class="glyph">أرني</span> show me</h2>
-            <p class="teach-note subtle">
-              Show me, guide, pen, and eraser are under the paper while you draw.
+            <h2 class="panel-title" data-i18n="watchTitle">Watch the stroke order</h2>
+            <p class="teach-note subtle" data-i18n="watchHelp">
+              Watch once. The paper will reset to the tracing outline for your turn.
             </p>
             <button type="button" class="teach-play" id="teachPlayBtn">
-              أرني · show me
+              Watch the stroke order
             </button>
             <input type="checkbox" id="ghostGuide" class="visually-hidden" tabindex="-1" aria-hidden="true" />
           </section>
