@@ -172,6 +172,15 @@ function getPracticeWords(char) {
   return PRACTICE_WORDS[c] || [];
 }
 
+/** Pick a different practice word that includes the letter being studied. */
+function randomAlphabetPracticeWord(char, avoid) {
+  const c = [...(char || "").trim()][0];
+  const words = getPracticeWords(c).filter((word) => word.includes(c));
+  const choices = words.filter((word) => word !== avoid);
+  const pool = choices.length ? choices : words;
+  return pool[Math.floor(Math.random() * pool.length)] || "";
+}
+
 function getAlphabetEntry(char) {
   const c = (char || "").trim();
   return ALPHABET.find((a) => a.char === c) || null;
