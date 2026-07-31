@@ -66,6 +66,7 @@ select {
 .app {
   min-height: 100vh;
   min-height: 100dvh;
+  position: relative;
   padding:
     max(20px, var(--safe-top))
     max(16px, var(--safe-right))
@@ -125,6 +126,121 @@ select {
 .app[data-ui-language="ar"] .kb-rail,
 .app[data-ui-language="ar"] .canvas-footer {
   font-family: "IBM Plex Sans Arabic", sans-serif;
+}
+
+.header-actions {
+  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  order: -1;
+  margin-bottom: -2px;
+}
+
+.github-link {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: rgba(255, 253, 248, 0.78);
+  color: var(--ink-soft);
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s;
+}
+
+.github-link svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.github-link:hover {
+  border-color: rgba(26, 23, 20, 0.3);
+  background: #fffdf8;
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.github-link:focus-visible {
+  outline: 2px solid rgba(139, 58, 42, 0.65);
+  outline-offset: 3px;
+}
+
+.creator-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 296px;
+  min-height: 58px;
+  padding: 10px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  background: var(--accent);
+  box-shadow: 0 5px 16px rgba(80, 34, 24, 0.18);
+  color: #fffaf1;
+  font-size: 0.84rem;
+  line-height: 1.15;
+  text-align: left;
+  text-decoration: none;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.creator-cta-icon {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  place-items: center;
+  padding-left: 2px;
+  border-radius: 50%;
+  background: #fffaf1;
+  color: var(--accent);
+  font-size: 0.7rem;
+}
+
+.creator-cta-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.creator-cta-copy strong {
+  font-weight: 500;
+}
+
+.creator-cta-copy small {
+  color: rgba(255, 250, 241, 0.78);
+  font-size: 0.74rem;
+}
+
+@media (min-width: 901px) {
+  .header-actions {
+    position: absolute;
+    top: max(20px, var(--safe-top));
+    right: max(16px, var(--safe-right));
+    margin-bottom: 0;
+  }
+
+  .practice-modes {
+    margin-top: 48px;
+  }
+}
+
+.creator-cta:hover {
+  background: #a34734;
+  box-shadow: 0 7px 20px rgba(80, 34, 24, 0.24);
+  transform: translateY(-2px);
+}
+
+.creator-cta:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.creator-cta span:first-child {
+  min-width: 0;
 }
 
 .title {
@@ -1312,6 +1428,10 @@ input[type="range"]::-moz-range-thumb {
     gap: 12px;
   }
 
+  .creator-cta {
+    margin-bottom: 0;
+  }
+
   .practice-modes {
     width: 100%;
   }
@@ -1498,6 +1618,10 @@ input[type="range"]::-moz-range-thumb {
 
 /* iPhone & small phones */
 @media (max-width: 520px) {
+  .creator-cta {
+    max-width: calc(100vw - 80px);
+  }
+
   .title-ar {
     font-size: 1.55rem;
   }
