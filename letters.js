@@ -265,6 +265,13 @@ const LETTERS = [
     tip: "Returning bowl with two dots below.",
   },
   {
+    char: "ء",
+    name: "hamza",
+    meaning: "hamza",
+    strokes: [{ x: 0.5, y: 0.42, label: "1" }],
+    tip: "Write hamza as a small free-standing mark. It does not join.",
+  },
+  {
     char: "لا",
     name: "lam-alif",
     meaning: "lā",

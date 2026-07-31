@@ -21,6 +21,7 @@ const NON_JOINERS = new Set([
   "ز",
   "و",
   "ؤ",
+  "ء",
   "ة", // often treated as non-joining left in teaching
 ]);
 
@@ -57,6 +58,7 @@ const ALPHABET = [
   { char: "ه", name: "ha", nameAr: "هاء" },
   { char: "و", name: "waw", nameAr: "واو" },
   { char: "ي", name: "ya", nameAr: "ياء" },
+  { char: "ء", name: "hamza", nameAr: "همزة" },
 ];
 
 const FORM_META = [
@@ -165,12 +167,14 @@ const PRACTICE_WORDS = {
   ه: ["هلال", "نهر", "وجه"],
   و: ["ورد", "ولد", "نور"],
   ي: ["يد", "بيت", "كتاب"],
+  ء: ["شيء", "سؤال", "فأس"],
 };
 
 const EXTRA_RANDOM_PRACTICE_WORDS = {
   ث: ["أثاث", "مثلث", "حثيث"],
   ض: ["ضفدع", "حوض", "مضيء"],
   ظ: ["ظرف", "محظوظ", "حفظ"],
+  ء: ["قراءة", "مؤمن", "سائل"],
 };
 
 function getPracticeWords(char) {
