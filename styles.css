@@ -931,14 +931,14 @@ select {
   display: none;
 }
 
-/* Desktop qalam: the click point sits on the cut reed nib. */
+/* Desktop writing cursor: dark pen tip stays visible on the cream paper. */
 @media (hover: hover) and (pointer: fine) {
   #ink {
-    cursor: none;
+    cursor: crosshair;
   }
 
   #ink.is-erasing {
-    cursor: none;
+    cursor: cell;
   }
 
   .qalam-cursor {
@@ -956,6 +956,11 @@ select {
 
   .qalam-cursor.visible {
     opacity: 1;
+  }
+
+  /* Hide the system cursor only while the custom pen is actually showing. */
+  #ink.custom-cursor-active {
+    cursor: none;
   }
 
   .qalam-cursor.is-erasing {
