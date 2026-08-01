@@ -927,46 +927,18 @@ select {
   cursor: cell;
 }
 
-.qalam-cursor {
-  display: none;
+/* Keep the system cursor visible on the paper.
+   A custom pen overlay previously hid it and could leave no cursor at all. */
+#ink {
+  cursor: crosshair;
 }
 
-/* Desktop writing cursor: dark pen tip stays visible on the cream paper. */
-@media (hover: hover) and (pointer: fine) {
-  #ink {
-    cursor: crosshair;
-  }
+#ink.is-erasing {
+  cursor: cell;
+}
 
-  #ink.is-erasing {
-    cursor: cell;
-  }
-
-  .qalam-cursor {
-    position: absolute;
-    z-index: 4;
-    display: block;
-    width: 36px;
-    height: 36px;
-    background: url("assets/qalam-cursor.png") center / contain no-repeat;
-    pointer-events: none;
-    opacity: 0;
-    transform: translate(-9px, -30px);
-    transition: opacity 0.08s;
-  }
-
-  .qalam-cursor.visible {
-    opacity: 1;
-  }
-
-  /* Hide the system cursor only while the custom pen is actually showing. */
-  #ink.custom-cursor-active {
-    cursor: none;
-  }
-
-  .qalam-cursor.is-erasing {
-    background-image: url("assets/eraser-cursor.png");
-    transform: translate(-18px, -18px);
-  }
+.qalam-cursor {
+  display: none !important;
 }
 
 .visually-hidden {
