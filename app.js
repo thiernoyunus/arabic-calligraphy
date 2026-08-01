@@ -314,6 +314,7 @@
     const t = tool === "erase" ? "erase" : "ink";
     brush.setTool(t);
     qalamCursor?.classList.remove("visible");
+    inkCanvas.classList.remove("custom-cursor-active");
     inkCanvas.style.cursor = "";
     document.querySelectorAll("[data-tool]").forEach((btn) => {
       const on = btn.dataset.tool === t;
@@ -487,6 +488,7 @@
       qalamCursor.style.transform = "translate(-9px, -30px)";
     }
     qalamCursor.classList.add("visible");
+    inkCanvas.classList.add("custom-cursor-active");
     inkCanvas.style.cursor = "none";
   }
 
@@ -505,6 +507,7 @@
   inkCanvas.addEventListener("pointercancel", onUp);
   inkCanvas.addEventListener("pointerleave", (e) => {
     qalamCursor?.classList.remove("visible");
+    inkCanvas.classList.remove("custom-cursor-active");
     inkCanvas.style.cursor = "";
     if (brush.drawing && e.pointerType === "mouse") onUp(e);
   });
