@@ -1,4 +1,8 @@
 <p align="center">
+  <img src="assets/icon.svg" width="112" alt="Arabic Calligraphy logo" />
+</p>
+
+<p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/header/grid.svg?title=Ink&subtitle=Practice+Arabic+writing+and+calligraphy&logo=pwa&mode=dark" />
     <img alt="Ink" src="https://shieldcn.dev/header/grid.svg?title=Ink&subtitle=Practice+Arabic+writing+and+calligraphy&logo=pwa&mode=light" />
