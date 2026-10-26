@@ -1,3 +1,17 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/header/grid.svg?title=Ink&subtitle=Practice+Arabic+writing+and+calligraphy&logo=pwa&mode=dark" />
+    <img alt="Ink" src="https://shieldcn.dev/header/grid.svg?title=Ink&subtitle=Practice+Arabic+writing+and+calligraphy&logo=pwa&mode=light" />
+  </picture>
+</p>
+
+<p align="center">
+  <a href="https://github.com/thiernoyunus/arabic-calligraphy"><img alt="JavaScript" src="https://shieldcn.dev/badge/JavaScript-No_build_step-F7DF1E.svg?variant=secondary&logo=javascript" /></a>
+  <a href="https://github.com/thiernoyunus/arabic-calligraphy/commits"><img alt="Last commit" src="https://shieldcn.dev/github/last-commit/thiernoyunus/arabic-calligraphy.svg?variant=secondary" /></a>
+  <a href="https://github.com/thiernoyunus/arabic-calligraphy/stargazers"><img alt="Stars" src="https://shieldcn.dev/github/stars/thiernoyunus/arabic-calligraphy.svg?variant=secondary" /></a>
+  <a href="LICENSE"><img alt="License" src="https://shieldcn.dev/github/license/thiernoyunus/arabic-calligraphy.svg?variant=secondary" /></a>
+</p>
+
 # حبر · Ink
 
 **Practice Arabic writing and calligraphy in the browser.**
